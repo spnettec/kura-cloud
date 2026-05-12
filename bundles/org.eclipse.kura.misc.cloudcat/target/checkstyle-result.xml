@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.19">
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.misc.cloudcat/src/main/java/org/eclipse/kura/internal/misc/cloudcat/CloudClientRelay.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.misc.cloudcat/src/main/java/org/eclipse/kura/internal/misc/cloudcat/CloudCatSubscription.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.misc.cloudcat/src/main/java/org/eclipse/kura/internal/misc/cloudcat/CloudCatOptions.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.misc.cloudcat/src/main/java/org/eclipse/kura/internal/misc/cloudcat/CloudCat.java">
+</file>
+</checkstyle>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.19">
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudComponentInstances.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudEndpointPidRequest.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/PubSubFactoryInfo.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudConnectionFactoryInfo.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/PidAndFactoryPidAndCloudEndpointPid.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudEndpointInstance.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudConnectionState.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudConnectionFactoryPidAndCloudEndpointPid.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudComponentFactories.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudPubSubType.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/CloudEndpointType.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/PubSubInstance.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/dto/ConnectedStatus.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/CloudConnectionManagerBridge.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/CloudConnectionService.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/util/PidUtils.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.rest.cloudconnection.provider/src/main/java/org/eclipse/kura/internal/rest/cloudconnection/provider/CloudConnectionRestService.java">
+</file>
+</checkstyle>

@@ -1,0 +1,17 @@
+#Tue May 12 10:13:33 WIB 2026
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/AlwaysConnectedStrategy.java=1727697075410
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/AutoConnectStrategy.java=1727697075411
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/DataMessage.java=1727697075411
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/DataServiceImpl.java=1778407317412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/DataServiceListenerS.java=1727697075411
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/DataServiceOptions.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/DataStore.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/ScheduleStrategy.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/store/HouseKeeperTask.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/store/MessageStoreState.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/transport/mqtt/DataTransportListenerS.java=1727697075412
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/transport/mqtt/MqttClientConfiguration.java=1727697075413
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/transport/mqtt/MqttDataTransport.java=1778413608751
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/data/util/MqttTopicUtil.java=1727697075413
+/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloud.base.provider/src/main/java/org/eclipse/kura/core/internal/data/TokenBucket.java=1727697075413
+configuration*?=8953A2FC66D5A7087AE9C38962AA259F3BFABCC9

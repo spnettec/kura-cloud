@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="8.19">
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnecton/raw/mqtt/util/AbstractStackComponent.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnecton/raw/mqtt/util/Property.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnecton/raw/mqtt/util/Utils.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnecton/raw/mqtt/util/StackComponentOptions.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/publisher/RawMqttPublisher.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/publisher/PublishOptions.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/cloud/RawMqttCloudEndpoint.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/cloud/Qos.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/cloud/Constants.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/subscriber/SubscribeOptions.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/subscriber/RawMqttSubscriber.java">
+</file>
+<file name="/Users/heyoulin/iot-kura-develop/git/kura/kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider/src/main/java/org/eclipse/kura/cloudconnection/raw/mqtt/factory/RawMqttCloudConnectionFactory.java">
+</file>
+</checkstyle>

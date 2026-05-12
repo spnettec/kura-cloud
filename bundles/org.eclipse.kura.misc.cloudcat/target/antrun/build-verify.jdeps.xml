@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="maven-antrun-" default="verify.jdeps">
+  <target name="verify.jdeps">
+    <available file="jdeps" filepath="/opt/homebrew/bin:/opt/homebrew/Cellar/jenv/0.6.0/libexec/libexec:/Users/heyoulin/.jenv/shims:/Users/heyoulin/.jenv/shims:/Users/heyoulin/bin:/Users/heyoulin/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin:/Library/Apple/usr/bin:/Users/heyoulin/.cargo/bin:/Applications/iTerm.app/Contents/Resources/utilities:/Users/heyoulin/.orbstack/bin" property="jdeps.present" />
+  </target>
+</project>

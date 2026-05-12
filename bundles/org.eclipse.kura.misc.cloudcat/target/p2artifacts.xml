@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='2'>
+  <artifact classifier='osgi.bundle' id='org.eclipse.kura.misc.cloudcat' version='2.0.0.202605120313'>
+    <properties size='8'>
+      <property name='artifact.size' value='17100'/>
+      <property name='download.size' value='17100'/>
+      <property name='download.checksum.sha-512' value='e9efa57216aa4dba5413a017a205cf611604ec4ca09eb25a7628c7ab98c01991a34c55ea780bebf0ca048521e0326e6fc1d8bb1e8c835585b1cfcf9115f3a598'/>
+      <property name='download.checksum.sha-256' value='6b5c93fe7684a05c02be8f2a89c05f18975155cb36371d3a2a8ede74532fbfc8'/>
+      <property name='maven-groupId' value='org.eclipse.kura'/>
+      <property name='maven-artifactId' value='org.eclipse.kura.misc.cloudcat'/>
+      <property name='maven-version' value='2.0.0-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+  <artifact classifier='osgi.bundle' id='org.eclipse.kura.misc.cloudcat.source' version='2.0.0.202605120313'>
+    <properties size='9'>
+      <property name='artifact.size' value='8061'/>
+      <property name='download.size' value='8061'/>
+      <property name='download.checksum.sha-512' value='b1b3d88da93dc30813dde3563889ce22aad2d24f05a54503a36d3723971a91e16a98c9ca038f1edb1d60ba771055529d20fb0e43f942dec293035a65d11d1456'/>
+      <property name='download.checksum.sha-256' value='2c80ba87a97c6c512e5b3c79d1a6a37d34255acedb7f763fe6c0060ea1d10b0a'/>
+      <property name='maven-groupId' value='org.eclipse.kura'/>
+      <property name='maven-artifactId' value='org.eclipse.kura.misc.cloudcat'/>
+      <property name='maven-version' value='2.0.0-SNAPSHOT'/>
+      <property name='maven-classifier' value='sources'/>
+      <property name='maven-type' value='java-source'/>
+    </properties>
+  </artifact>
+</artifacts>

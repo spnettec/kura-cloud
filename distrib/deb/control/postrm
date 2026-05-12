@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Copyright (c) 2026 YOFC IOT and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+# Remove this sibling from the install-order registry on remove|purge.
+# On upgrade dpkg also calls postrm (with "upgrade") on the old package;
+# we must NOT touch the registry in that case — order must be preserved.
+
+SIBLING_NAME="cloud"
+REGISTRY="/opt/eclipse/kura/framework/sibling-install-order"
+
+case "$1" in
+    remove|purge|disappear)
+        if [ -f "${REGISTRY}" ]; then
+            # Portable in-place delete (GNU vs BSD sed differ on -i).
+            TMP=$(mktemp 2>/dev/null || echo "${REGISTRY}.tmp.$$")
+            grep -vFx "${SIBLING_NAME}" "${REGISTRY}" > "${TMP}" 2>/dev/null || true
+            mv -f "${TMP}" "${REGISTRY}" 2>/dev/null || rm -f "${TMP}"
+        fi
+        ;;
+    upgrade|failed-upgrade|abort-install|abort-upgrade)
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Raw MQTT Cloud Connection Provider
+Bundle-SymbolicName: org.eclipse.kura.cloudconnection.raw.mqtt.provider;
+ singleton:=true
+Bundle-Version: 2.0.0.202605120313
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",org.eclipse.kura.cl
+ oud;version="[1.1,2.0)",org.eclipse.kura.cloudconnection;version="[1.0,
+ 1.1)",org.eclipse.kura.cloudconnection.factory;version="[1.0,1.3)",org.
+ eclipse.kura.cloudconnection.listener;version="[1.0,2.0)",org.eclipse.k
+ ura.cloudconnection.message;version="[1.0,2.0)",org.eclipse.kura.cloudc
+ onnection.publisher;version="[1.0,1.1)",org.eclipse.kura.cloudconnectio
+ n.subscriber;version="[1.0,1.1)",org.eclipse.kura.cloudconnection.subsc
+ riber.listener;version="[1.0,2.0)",org.eclipse.kura.configuration.metat
+ ype;version="1.1.0",org.eclipse.kura.configuration;version="[1.1,2.0)",
+ org.eclipse.kura.core.data.util;version="[1.0,2.0)",org.eclipse.kura.da
+ ta;version="[1.0,2.0)",org.eclipse.kura.data.listener;version="[1.0,1.1
+ )",org.eclipse.kura.locale;version="[1.0,2.0)",org.eclipse.kura.marshal
+ ling;version="1.0.0",org.eclipse.kura.message;version="[1.0,2.0)",org.o
+ sgi.framework;version="1.5.0",org.osgi.service.cm;version="1.6.0",org.o
+ sgi.service.component;version="1.2.0",org.osgi.service.event;version="1
+ .3.1",org.osgi.util.tracker;version="1.5.1",org.slf4j;version="[1.7.0,3
+ )"
+Eclipse-SourceReferences: scm:git:ssh://github.com/eclipse/kura/kura;pat
+ h="kura/org.eclipse.kura.cloudconnection.raw.mqtt.provider";commitId=91
+ 7dcd01d7bcc5ccf43b5d6bd7f978a749a8b2c8
+

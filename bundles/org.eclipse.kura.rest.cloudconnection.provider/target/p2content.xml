@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<units size='2'>
+  <unit id='org.eclipse.kura.rest.cloudconnection.provider' version='2.0.0.202605120313' generation='2'>
+    <update id='org.eclipse.kura.rest.cloudconnection.provider' range='[0.0.0,2.0.0.202605120313)' severity='0'/>
+    <properties size='5'>
+      <property name='org.eclipse.equinox.p2.name' value='CloudConnection REST Service'/>
+      <property name='maven-groupId' value='org.eclipse.kura'/>
+      <property name='maven-artifactId' value='org.eclipse.kura.rest.cloudconnection.provider'/>
+      <property name='maven-version' value='2.0.0-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+    <provides size='4'>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.kura.rest.cloudconnection.provider' version='2.0.0.202605120313'/>
+      <provided namespace='osgi.bundle' name='org.eclipse.kura.rest.cloudconnection.provider' version='2.0.0.202605120313'/>
+      <provided namespace='osgi.identity' name='org.eclipse.kura.rest.cloudconnection.provider' version='2.0.0.202605120313'>
+        <properties size='1'>
+          <property name='type' value='osgi.bundle'/>
+        </properties>
+      </provided>
+      <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+    </provides>
+    <requires size='30'>
+      <required namespace='java.package' name='jakarta.annotation.security' range='2.1.1'/>
+      <required namespace='java.package' name='jakarta.ws.rs' range='3.1.0'/>
+      <required namespace='java.package' name='jakarta.ws.rs.core' range='3.1.0'/>
+      <required namespace='java.package' name='org.apache.commons.io' range='2.4.0'/>
+      <required namespace='java.package' name='org.eclipse.kura' range='[1.3.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloud' range='[1.1.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloud.factory' range='[1.1.1,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloudconnection' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloudconnection.factory' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloudconnection.publisher' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloudconnection.request' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.cloudconnection.subscriber' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.configuration' range='[1.2.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.configuration.metatype' range='[1.1.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.core.configuration' range='[2.0.0,3.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.crypto' range='1.3.0'/>
+      <required namespace='java.package' name='org.eclipse.kura.data' range='[1.1.2,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.request.handler.jaxrs' range='[2.0.0,3.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.request.handler.jaxrs.annotation' range='[1.0.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.rest.configuration.api' range='[1.1.0,2.0.0)'/>
+      <required namespace='java.package' name='org.eclipse.kura.util.service' range='[1.2.0,2.0.0)'/>
+      <required namespace='java.package' name='org.osgi.framework' range='1.8.0'/>
+      <required namespace='java.package' name='org.osgi.service.cm' range='1.6.0'/>
+      <required namespace='java.package' name='org.osgi.service.component' range='[1.3.0,2.0.0)'/>
+      <required namespace='java.package' name='org.osgi.service.component.runtime' range='1.4.0'/>
+      <required namespace='java.package' name='org.osgi.service.component.runtime.dto' range='1.4.0'/>
+      <required namespace='java.package' name='org.osgi.service.useradmin' range='1.1.0'/>
+      <required namespace='java.package' name='org.slf4j' range='[1.7.0,3.0.0)'/>
+      <requiredProperties namespace='osgi.ee' match='(&amp;(osgi.ee=JavaSE)(version=21))'>
+        <description>
+          org.eclipse.kura.rest.cloudconnection.provider
+        </description>
+      </requiredProperties>
+      <required namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.kura.rest.cloudconnection.provider.source' range='[2.0.0.202605120313,2.0.0.202605120313]' optional='true'>
+        <filter>
+          (org.eclipse.update.install.sources=true)
+        </filter>
+      </required>
+    </requires>
+    <artifacts size='1'>
+      <artifact classifier='osgi.bundle' id='org.eclipse.kura.rest.cloudconnection.provider' version='2.0.0.202605120313'/>
+    </artifacts>
+    <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+    <touchpointData size='1'>
+      <instructions size='1'>
+        <instruction key='manifest'>
+          Bundle-SymbolicName: org.eclipse.kura.rest.cloudconnection.provider;singleton:=true&#xA;Bundle-Version: 2.0.0.202605120313&#xA;
+        </instruction>
+      </instructions>
+    </touchpointData>
+  </unit>
+  <unit id='org.eclipse.kura.rest.cloudconnection.provider.source' version='2.0.0.202605120313' singleton='false'>
+    <update id='org.eclipse.kura.rest.cloudconnection.provider.source' range='[0.0.0,2.0.0.202605120313)' severity='0'/>
+    <properties size='10'>
+      <property name='df_LT.bundleVendor' value='unknown'/>
+      <property name='df_LT.bundleName' value='CloudConnection REST Service Source'/>
+      <property name='org.eclipse.equinox.p2.name' value='%bundleName'/>
+      <property name='org.eclipse.equinox.p2.provider' value='%bundleVendor'/>
+      <property name='org.eclipse.equinox.p2.bundle.localization' value='OSGI-INF/l10n/bundle-src'/>
+      <property name='maven-groupId' value='org.eclipse.kura'/>
+      <property name='maven-artifactId' value='org.eclipse.kura.rest.cloudconnection.provider'/>
+      <property name='maven-version' value='2.0.0-SNAPSHOT'/>
+      <property name='maven-classifier' value='sources'/>
+      <property name='maven-type' value='java-source'/>
+    </properties>
+    <provides size='5'>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='org.eclipse.kura.rest.cloudconnection.provider.source' version='2.0.0.202605120313'/>
+      <provided namespace='osgi.bundle' name='org.eclipse.kura.rest.cloudconnection.provider.source' version='2.0.0.202605120313'/>
+      <provided namespace='osgi.identity' name='org.eclipse.kura.rest.cloudconnection.provider.source' version='2.0.0.202605120313'>
+        <properties size='1'>
+          <property name='type' value='osgi.bundle'/>
+        </properties>
+      </provided>
+      <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='source' version='1.0.0'/>
+      <provided namespace='org.eclipse.equinox.p2.localization' name='df_LT' version='1.0.0'/>
+    </provides>
+    <artifacts size='1'>
+      <artifact classifier='osgi.bundle' id='org.eclipse.kura.rest.cloudconnection.provider.source' version='2.0.0.202605120313'/>
+    </artifacts>
+    <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+    <touchpointData size='1'>
+      <instructions size='1'>
+        <instruction key='manifest'>
+          Bundle-SymbolicName: org.eclipse.kura.rest.cloudconnection.provider.source&#xA;Bundle-Version: 2.0.0.202605120313&#xA;
+        </instruction>
+      </instructions>
+    </touchpointData>
+  </unit>
+</units>

@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Copyright (c) 2026 YOFC IOT and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+# Register this sibling in the kura-core install-order registry so
+# gen_config_ini.sh loads it in install order. Idempotent: only appends if
+# this sibling's directory name is not already listed (handles upgrade and
+# dpkg --install of an already-installed package).
+
+SIBLING_NAME="cloud"
+REGISTRY="/opt/eclipse/kura/framework/sibling-install-order"
+
+if [ -f "${REGISTRY}" ]; then
+    if ! grep -qFx "${SIBLING_NAME}" "${REGISTRY}"; then
+        echo "${SIBLING_NAME}" >> "${REGISTRY}"
+    fi
+else
+    # Registry not present: kura-core may be too old or being installed in
+    # parallel. Create it so we can still record our name; kura-core's
+    # postinst will adopt it (idempotent file creation there too).
+    mkdir -p /opt/eclipse/kura/framework 2>/dev/null || true
+    echo "${SIBLING_NAME}" > "${REGISTRY}"
+    chown kurad:kurad "${REGISTRY}" 2>/dev/null || true
+    chmod 664 "${REGISTRY}" 2>/dev/null || true
+fi
+
+exit 0
