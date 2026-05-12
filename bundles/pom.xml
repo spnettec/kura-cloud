@@ -358,5 +358,11 @@
     <modules>
         <module>org.eclipse.kura.cloud.base.provider</module>
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
+        <module>org.eclipse.kura.core.cloud.factory</module>
+        <module>org.eclipse.kura.misc.cloudcat</module>
+        <module>org.eclipse.kura.rest.cloudconnection.provider</module>
     </modules>
 </project>

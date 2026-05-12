@@ -16,6 +16,7 @@
 
 SIBLING_NAME="cloud"
 REGISTRY="/opt/eclipse/kura/framework/sibling-install-order"
+KURA_PROPERTIES="/opt/eclipse/kura/framework/kura.properties"
 
 if [ -f "${REGISTRY}" ]; then
     if ! grep -qFx "${SIBLING_NAME}" "${REGISTRY}"; then
@@ -29,6 +30,13 @@ else
     echo "${SIBLING_NAME}" > "${REGISTRY}"
     chown kurad:kurad "${REGISTRY}" 2>/dev/null || true
     chmod 664 "${REGISTRY}" 2>/dev/null || true
+fi
+
+# Enable Cloud Connections UI tab: flip kura.have.cloud.connection to true.
+# kura-core ships this property as false by default so the tab is hidden
+# when kura-cloud is not installed.
+if [ -f "${KURA_PROPERTIES}" ]; then
+    sed -i "s|^#*kura.have.cloud.connection=.*|kura.have.cloud.connection=true|" "${KURA_PROPERTIES}"
 fi
 
 exit 0
