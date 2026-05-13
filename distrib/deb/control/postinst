@@ -32,12 +32,9 @@ esac
 
 echo "Installing Kura Cloud addon..."
 export TIMESTAMP=$(date +%Y%m%d%H%M)
-export LOG=/tmp/kura_cloud_install_${TIMESTAMP}.log
+export LOG=/var/log/kura_cloud_install_${TIMESTAMP}.log
 
 bash /opt/eclipse/kura/.data/kura_cloud_install.sh ${STATUS} /opt/eclipse kura 2>&1 | tee -a $LOG | systemd-cat -t Kura
-
-mkdir -p /opt/eclipse/kura/log
-mv $LOG /opt/eclipse/kura/log/
 
 if test -f /tmp/install_error; then
     echo "Kura Cloud addon installation failed."

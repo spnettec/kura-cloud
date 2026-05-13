@@ -25,7 +25,8 @@ esac
 
 echo "Uninstalling Kura Cloud addon..."
 export TIMESTAMP=$(date +%Y%m%d%H%M)
-export LOG=/tmp/kura_cloud_install_${TIMESTAMP}.log
+export LOG_FILE=kura_cloud_install_${TIMESTAMP}.log
+export LOG=/var/log/${LOG_FILE}
 
 {
     echo "Uninstalling Kura Cloud addon..."
@@ -43,15 +44,11 @@ export LOG=/tmp/kura_cloud_install_${TIMESTAMP}.log
         grep -vFx "${SIBLING_NAME}" "${REGISTRY}" > "${TMP}" 2>/dev/null || true
         mv -f "${TMP}" "${REGISTRY}" 2>/dev/null || rm -f "${TMP}"
     else
-        echo "  Warning: sibling-install-order registry not found"
+        echo "  sibling-install-order registry absent; skipping"
     fi
 
     echo "Kura Cloud addon uninstallation completed."
-} 2>&1 | tee -a $LOG | systemd-cat -t Kura
+} 2>&1 | tee -a "$LOG" | systemd-cat -t Kura
 
-mkdir -p /opt/eclipse/kura/log 2>/dev/null
-if [ -d /opt/eclipse/kura/log ]; then
-    mv $LOG /opt/eclipse/kura/log/ 2>/dev/null
-fi
 
 exit 0
