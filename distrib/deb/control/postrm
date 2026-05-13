@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2026 YOFC IOT and others
 #
@@ -9,31 +9,31 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Remove this sibling from the install-order registry on remove|purge.
-# On upgrade dpkg also calls postrm (with "upgrade") on the old package;
-# we must NOT touch the registry in that case — order must be preserved.
-
-SIBLING_NAME="cloud"
-REGISTRY="/opt/eclipse/kura/framework/sibling-install-order"
-KURA_PROPERTIES="/opt/eclipse/kura/framework/kura.properties"
-
 case "$1" in
     remove|purge|disappear)
-        if [ -f "${REGISTRY}" ]; then
-            # Portable in-place delete (GNU vs BSD sed differ on -i).
-            TMP=$(mktemp 2>/dev/null || echo "${REGISTRY}.tmp.$$")
-            grep -vFx "${SIBLING_NAME}" "${REGISTRY}" > "${TMP}" 2>/dev/null || true
-            mv -f "${TMP}" "${REGISTRY}" 2>/dev/null || rm -f "${TMP}"
-        fi
-
-        # Disable Cloud Connections UI tab: flip kura.have.cloud.connection back
-        # to false so the tab is hidden when kura-cloud is no longer installed.
-        if [ -f "${KURA_PROPERTIES}" ]; then
-            sed -i "s|^#*kura.have.cloud.connection=.*|kura.have.cloud.connection=false|" "${KURA_PROPERTIES}"
-        fi
+        STATUS=remove
         ;;
     upgrade|failed-upgrade|abort-install|abort-upgrade)
+        # Don't touch registry on upgrade — preserve install order
+        exit 0
+        ;;
+    *)
+        echo "postrm called with unknown parameter $1"
+        exit 0
         ;;
 esac
+
+echo "Uninstalling Kura Cloud addon..."
+export TIMESTAMP=$(date +%Y%m%d%H%M)
+export LOG=/tmp/kura_cloud_uninstall_${TIMESTAMP}.log
+
+if [ -f /opt/eclipse/kura/.data/kura_cloud_uninstall.sh ]; then
+    bash /opt/eclipse/kura/.data/kura_cloud_uninstall.sh ${STATUS} /opt/eclipse kura 2>&1 | tee -a $LOG | systemd-cat -t Kura
+
+    mkdir -p /opt/eclipse/kura/log 2>/dev/null
+    if [ -d /opt/eclipse/kura/log ]; then
+        mv $LOG /opt/eclipse/kura/log/ 2>/dev/null
+    fi
+fi
 
 exit 0

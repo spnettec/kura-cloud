@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2026 YOFC IOT and others
 #
@@ -9,34 +9,41 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Register this sibling in the kura-core install-order registry so
-# gen_config_ini.sh loads it in install order. Idempotent: only appends if
-# this sibling's directory name is not already listed (handles upgrade and
-# dpkg --install of an already-installed package).
+case "$1" in
+    configure)
+        STATUS=install
+        ;;
 
-SIBLING_NAME="cloud"
-REGISTRY="/opt/eclipse/kura/framework/sibling-install-order"
-KURA_PROPERTIES="/opt/eclipse/kura/framework/kura.properties"
+    abort-remove)
+        echo "Uninstallation failed."
+        exit 1
+        ;;
 
-if [ -f "${REGISTRY}" ]; then
-    if ! grep -qFx "${SIBLING_NAME}" "${REGISTRY}"; then
-        echo "${SIBLING_NAME}" >> "${REGISTRY}"
-    fi
-else
-    # Registry not present: kura-core may be too old or being installed in
-    # parallel. Create it so we can still record our name; kura-core's
-    # postinst will adopt it (idempotent file creation there too).
-    mkdir -p /opt/eclipse/kura/framework 2>/dev/null || true
-    echo "${SIBLING_NAME}" > "${REGISTRY}"
-    chown kurad:kurad "${REGISTRY}" 2>/dev/null || true
-    chmod 664 "${REGISTRY}" 2>/dev/null || true
+    abort-upgrade)
+        echo "Upgrade failed."
+        exit 1
+        ;;
+
+    *)
+        echo "postinst called with unknown parameter $1"
+        exit 1
+        ;;
+esac
+
+echo "Installing Kura Cloud addon..."
+export TIMESTAMP=$(date +%Y%m%d%H%M)
+export LOG=/tmp/kura_cloud_install_${TIMESTAMP}.log
+
+bash /opt/eclipse/kura/.data/kura_cloud_install.sh ${STATUS} /opt/eclipse kura 2>&1 | tee -a $LOG | systemd-cat -t Kura
+
+mkdir -p /opt/eclipse/kura/log
+mv $LOG /opt/eclipse/kura/log/
+
+if test -f /tmp/install_error; then
+    echo "Kura Cloud addon installation failed."
+    rm /tmp/install_error
+    exit 1
 fi
 
-# Enable Cloud Connections UI tab: flip kura.have.cloud.connection to true.
-# kura-core ships this property as false by default so the tab is hidden
-# when kura-cloud is not installed.
-if [ -f "${KURA_PROPERTIES}" ]; then
-    sed -i "s|^#*kura.have.cloud.connection=.*|kura.have.cloud.connection=true|" "${KURA_PROPERTIES}"
-fi
-
+echo "Kura Cloud addon installation completed."
 exit 0
