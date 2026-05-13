@@ -32,7 +32,7 @@ if [ -f "${REGISTRY}" ]; then
     grep -vFx "${SIBLING_NAME}" "${REGISTRY}" > "${TMP}" 2>/dev/null || true
     mv -f "${TMP}" "${REGISTRY}" 2>/dev/null || rm -f "${TMP}"
 else
-    echo "  Warning: sibling-install-order registry not found"
+    echo "  sibling-install-order registry absent; skipping"
 fi
 
 # Disable Cloud Connections UI tab: flip kura.have.cloud.connection back to false
