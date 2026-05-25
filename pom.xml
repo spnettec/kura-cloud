@@ -39,5 +39,6 @@
         <module>target-definition</module>
         <module>bundles</module>
         <module>distrib</module>
+        <module>dp</module>
     </modules>
 </project>
