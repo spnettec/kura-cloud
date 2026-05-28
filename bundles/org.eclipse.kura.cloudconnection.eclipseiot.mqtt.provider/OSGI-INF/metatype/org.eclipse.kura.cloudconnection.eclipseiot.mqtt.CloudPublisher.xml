@@ -36,8 +36,8 @@
             description="%messageTypeDesc">
             <Option label="%qos1Label" value="telemetryQos0" />
             <Option label="%qos2Label" value="telemetryQos1" />
-            <Option label="%eventLabel" value="events" />
-            <Option label="%alertLabel" value="alerts" />
+            <Option label="%eventLabel" value="event" />
+            <Option label="%alertLabel" value="alert" />
         </AD>
     </OCD>
     
