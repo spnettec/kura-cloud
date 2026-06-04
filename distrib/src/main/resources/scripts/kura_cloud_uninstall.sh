@@ -18,7 +18,11 @@ KURA_SYMLINK=$3
 
 SIBLING_NAME="cloud"
 REGISTRY="${BASE_DIR}/${KURA_SYMLINK}/framework/sibling-install-order"
-KURA_PROPERTIES="${BASE_DIR}/${KURA_SYMLINK}/framework/kura.properties"
+# Write to kura_custom.properties (under user/) rather than kura.properties
+# (under framework/). kura_custom.properties overrides kura.properties and
+# is preserved across kura-core upgrades because user/ is part of the
+# upgrade save/restore cycle.
+KURA_PROPERTIES="${BASE_DIR}/${KURA_SYMLINK}/user/kura_custom.properties"
 
 echo "Uninstalling Kura Cloud addon..."
 echo "  Status: ${STATUS}"
@@ -35,12 +39,11 @@ else
     echo "  sibling-install-order registry absent; skipping"
 fi
 
-# Disable Cloud Connections UI tab: flip kura.have.cloud.connection back to false
-if [ -f "${KURA_PROPERTIES}" ]; then
-    echo "  Disabling cloud connection UI (kura.have.cloud.connection=false)"
-    sed -i "s|^#*kura.have.cloud.connection=.*|kura.have.cloud.connection=false|" "${KURA_PROPERTIES}"
-else
-    echo "  Warning: kura.properties not found at ${KURA_PROPERTIES}"
-fi
+# Disable Cloud Connections UI tab: flip kura.have.cloud.connection back to false.
+# Write to kura_custom.properties so the setting survives kura-core upgrades.
+echo "  Disabling cloud connection UI (kura.have.cloud.connection=false)"
+mkdir -p "$(dirname "${KURA_PROPERTIES}")" 2>/dev/null || true
+sed -i "s|^#*kura.have.cloud.connection=.*|kura.have.cloud.connection=false|" "${KURA_PROPERTIES}" 2>/dev/null \
+    || echo "kura.have.cloud.connection=false" >> "${KURA_PROPERTIES}"
 
 echo "Kura Cloud addon uninstallation completed."
