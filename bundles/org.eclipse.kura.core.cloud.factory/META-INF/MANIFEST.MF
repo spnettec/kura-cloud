@@ -19,3 +19,4 @@ Import-Package: org.eclipse.kura;version="1.6.0",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.cm;version="1.6.0",
  org.osgi.service.component
+Bundle-RequiredExecutionEnvironment: JavaSE-21

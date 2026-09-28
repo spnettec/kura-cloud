@@ -51,3 +51,4 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.osgi.util.position;version="[1.0,2.0)",
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.6.4"
+Bundle-RequiredExecutionEnvironment: JavaSE-21
