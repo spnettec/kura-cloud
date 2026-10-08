@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
- lib/protobuf-java.jar
+ protobuf-java.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
  com.google.protobuf;version="4.30.2",
