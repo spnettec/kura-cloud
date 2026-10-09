@@ -31,6 +31,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
+import org.eclipse.kura.core.ssl.SSLSocketFactoryWrapper;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
@@ -833,6 +834,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
                     try {
                         SSLSocketFactory ssf = this.sslManagerService.get().getSSLSocketFactory();
                         conOpt.setSocketFactory(ssf);
+                        if (ssf instanceof SSLSocketFactoryWrapper) {
+                            // Kura's factory applies the configured hostname policy to each socket.
+                            conOpt.setHttpsHostnameVerificationEnabled(false);
+                        }
                     } catch (Exception e) {
                         logger.error("SSL setup failed", e);
                         throw new IllegalStateException("SSL setup failed");
