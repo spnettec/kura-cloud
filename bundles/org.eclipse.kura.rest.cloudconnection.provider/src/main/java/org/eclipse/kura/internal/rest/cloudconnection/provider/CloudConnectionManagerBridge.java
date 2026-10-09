@@ -120,15 +120,14 @@ public class CloudConnectionManagerBridge {
 
                 for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
                     DataService dataService = ServiceUtil.getService(this.bundleContext, dataServiceReference);
-                    if (dataService != null) {
-
+                    try {
                         invokeAndHandleExceptions(dataServiceConsumer, dataService);
                         return true;
+                    } finally {
+                        ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
                     }
-                    ServiceUtil.ungetService(this.bundleContext, dataServiceReference);
                 }
             }
-            ServiceUtil.ungetService(this.bundleContext, cloudServiceReference);
         }
 
         return false;
@@ -145,11 +144,13 @@ public class CloudConnectionManagerBridge {
                 CloudConnectionManager cloudConnectionManager = ServiceUtil.getService(this.bundleContext,
                         cloudConnectionManagerReference);
 
-                invokeAndHandleExceptions(cloudConnectionManagerConsumer, cloudConnectionManager);
-
-                return true;
+                try {
+                    invokeAndHandleExceptions(cloudConnectionManagerConsumer, cloudConnectionManager);
+                    return true;
+                } finally {
+                    ServiceUtil.ungetService(this.bundleContext, cloudConnectionManagerReference);
+                }
             }
-            ServiceUtil.ungetService(this.bundleContext, cloudConnectionManagerReference);
         }
 
         return false;
