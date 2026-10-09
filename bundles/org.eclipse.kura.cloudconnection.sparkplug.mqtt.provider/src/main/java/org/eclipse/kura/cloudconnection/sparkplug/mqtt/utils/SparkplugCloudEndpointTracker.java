@@ -83,7 +83,11 @@ public class SparkplugCloudEndpointTracker {
         public synchronized void removedService(final ServiceReference<CloudConnectionManager> reference,
                 final CloudConnectionManager service) {
             if (service instanceof SparkplugCloudEndpoint) {
-                SparkplugCloudEndpointTracker.this.serviceRemovedConsumer.accept((SparkplugCloudEndpoint) service);
+                try {
+                    SparkplugCloudEndpointTracker.this.serviceRemovedConsumer.accept((SparkplugCloudEndpoint) service);
+                } finally {
+                    SparkplugCloudEndpointTracker.this.bundleContext.ungetService(reference);
+                }
             }
         }
 
