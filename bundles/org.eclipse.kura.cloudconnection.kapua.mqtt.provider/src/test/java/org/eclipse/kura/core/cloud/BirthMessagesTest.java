@@ -26,6 +26,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.clearInvocations;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,6 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.AfterEach;
 import org.mockito.MockedStatic;
 
@@ -83,6 +86,7 @@ public class BirthMessagesTest {
     private Runnable delayedPublish;
     private ScheduledFuture<?> delayedFuture;
     private long requestedDelay;
+    private final AtomicBoolean schedulerStopped = new AtomicBoolean();
     private boolean activated;
     private boolean deactivated;
     private DataService dataService = mock(DataService.class);
@@ -263,6 +267,48 @@ public class BirthMessagesTest {
      * Given
      */
 
+    @Test
+    public void shouldCancelPendingBirthAndRejectQueuedPublishOnDeactivation() throws Exception {
+        givenConfiguredCloudService();
+        givenConnected();
+        givenTamperEvent();
+        whenHandleEvent();
+        thenNoExceptionOccurred();
+        assertNotNull(this.delayedPublish);
+        givenDisconnected();
+        whenDeactivate();
+        thenNoExceptionOccurred();
+        verify(this.delayedFuture).cancel(false);
+        verify(this.scheduler).shutdown();
+        this.delayedPublish.run();
+        thenNoBirthIsPublished();
+    }
+
+    @Test
+    public void shouldNotReadClearedServicesFromQueuedTask() throws Exception {
+        givenConfiguredCloudService();
+        givenConnected();
+        givenTamperEvent();
+        whenHandleEvent();
+        thenNoExceptionOccurred();
+        assertNotNull(this.delayedPublish);
+        givenDisconnected();
+        whenDeactivate();
+        thenNoExceptionOccurred();
+        clearInvocations(this.cloudService);
+        this.delayedPublish.run();
+        verify(this.cloudService, never()).getSystemService();
+        thenNoBirthIsPublished();
+    }
+
+    @Test
+    public void shouldReleaseSchedulerEvenWithoutPendingBirth() {
+        givenConfiguredCloudService();
+        whenDeactivate();
+        thenNoExceptionOccurred();
+        verify(this.scheduler).shutdown();
+    }
+
     private void givenConfiguredCloudService() {
         this.cloudService.activate(getMockComponentContext(), getDefaultProperties());
         this.activated = true;
@@ -416,8 +462,13 @@ public class BirthMessagesTest {
         // Only the per-instance scheduler is replaced; the shared callback executor stays untouched.
         try (MockedStatic<Executors> factories = mockStatic(Executors.class, CALLS_REAL_METHODS)) {
             factories.when(Executors::newSingleThreadScheduledExecutor).thenReturn(this.scheduler);
-            this.cloudService = new CloudServiceImpl();
+            this.cloudService = spy(new CloudServiceImpl());
         }
+        when(this.scheduler.isShutdown()).thenAnswer(invocation -> this.schedulerStopped.get());
+        org.mockito.Mockito.doAnswer(invocation -> {
+            this.schedulerStopped.set(true);
+            return null;
+        }).when(this.scheduler).shutdown();
         when(this.scheduler.schedule(any(Runnable.class), ArgumentMatchers.anyLong(), any(TimeUnit.class)))
                 .thenAnswer(invocation -> {
                     this.delayedPublish = invocation.getArgument(0);

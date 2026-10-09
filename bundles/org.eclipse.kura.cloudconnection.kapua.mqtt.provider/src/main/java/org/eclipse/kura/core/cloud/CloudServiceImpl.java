@@ -388,6 +388,16 @@ public class CloudServiceImpl
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate {}...", componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 
+        // Serialize shutdown with delayed publishing before clearing service bindings.
+        synchronized (this.shouldPublishDelayedBirth) {
+            if (this.scheduledBirthPublisherFuture != null) {
+                this.scheduledBirthPublisherFuture.cancel(false);
+                this.scheduledBirthPublisherFuture = null;
+            }
+            this.scheduledBirthPublisher.shutdown();
+            this.shouldPublishDelayedBirth.set(false);
+        }
+
         if (isConnected()) {
             try {
                 publishDisconnectCertificate();
@@ -852,6 +862,9 @@ public class CloudServiceImpl
 
     private void publishWithDelay(boolean isAppUpdate) {
         synchronized (this.shouldPublishDelayedBirth) {
+            if (this.scheduledBirthPublisher.isShutdown()) {
+                return;
+            }
             if (!isAppUpdate) {
                 this.shouldPublishDelayedBirth.set(true);
             }
@@ -891,6 +904,9 @@ public class CloudServiceImpl
 
     private void publishDelayedMessage() {
         synchronized (this.shouldPublishDelayedBirth) {
+            if (this.scheduledBirthPublisher.isShutdown()) {
+                return;
+            }
             try {
 
                 if (this.shouldPublishDelayedBirth.get()) {
