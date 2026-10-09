@@ -140,12 +140,10 @@ class MqttDataTransportTest {
     }
 
     @AfterEach
-    void closeClient() throws Throwable {
+    void closeClient() throws Exception {
         try {
             if (this.transport != null) {
                 this.transport.deactivate(this.componentContext);
-                // The current lifecycle only disconnects. Close retained Paho resources explicitly in this fixture.
-                TestUtil.invokePrivate(this.transport, "closeMqttClient");
             }
         } finally {
             if (this.ssl != null) {

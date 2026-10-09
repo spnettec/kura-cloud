@@ -233,10 +233,13 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // They should be able to complete whatever is needed,
         // e.g. publishing a special last message,
         // synchronously in their deactivate method and disconnect us cleanly.
-        // There shouldn't be anything to do here other then
-        // perhaps forcibly disconnecting the MQTT client if not already done.
-        if (isConnected()) {
-            disconnect(0);
+        // Complete any remaining disconnect, then release the client we own.
+        try {
+            if (isConnected()) {
+                disconnect(0);
+            }
+        } finally {
+            closeMqttClient();
         }
     }
 
