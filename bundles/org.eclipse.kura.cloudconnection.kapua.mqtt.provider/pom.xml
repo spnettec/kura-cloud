@@ -197,6 +197,11 @@
       <artifactId>guava</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <properties>
     <kura.basedir>${project.basedir}/..</kura.basedir>
