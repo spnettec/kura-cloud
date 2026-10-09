@@ -41,6 +41,16 @@ public class DataServiceTest extends StepsCollection {
     }
 
     @Test
+    public void shouldRemoveDataServiceListenerOnDeactivation() {
+        givenDataService(this.dataService);
+        whenActivate(new PropertiesBuilder().add(ConfigurationService.KURA_SERVICE_PID, "test-pid").build());
+        whenDeactivate();
+        org.mockito.InOrder order = org.mockito.Mockito.inOrder(this.dataService);
+        order.verify(this.dataService).disconnect(0);
+        order.verify(this.dataService).removeDataServiceListener(this.endpoint);
+    }
+
+    @Test
     public void shouldCallDataServiceIsConnected() {
         givenDataService(this.dataService);
 

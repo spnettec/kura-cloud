@@ -107,6 +107,7 @@ public class SparkplugCloudEndpoint
             logger.info("{} - Error disconnecting", this.kuraServicePid, e);
         }
 
+        this.dataService.removeDataServiceListener(this);
         this.executorService.shutdownNow();
 
         logger.info("{} - Deactivated", this.kuraServicePid);
