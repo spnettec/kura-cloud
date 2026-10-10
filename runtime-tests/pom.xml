@@ -5,6 +5,7 @@
   <parent><groupId>org.eclipse.kura</groupId><artifactId>kura-cloud</artifactId><version>3.0.0-SNAPSHOT</version><relativePath>../pom.xml</relativePath></parent>
   <artifactId>kura-cloud-runtime-tests</artifactId>
   <dependencies>
+    <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId><version>3.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
     <dependency><groupId>com.github.moquette-io.moquette</groupId><artifactId>moquette-broker</artifactId><version>0.18.0</version><scope>test</scope>
       <exclusions><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-reload4j</artifactId></exclusion><exclusion><groupId>com.h2database</groupId><artifactId>h2-mvstore</artifactId></exclusion></exclusions>
     </dependency>
@@ -31,6 +32,7 @@
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>
       <executions><execution><id>prepare-real-cloud-bundles</id><phase>process-test-resources</phase><goals><goal>copy</goal></goals>
         <configuration><outputDirectory>${project.build.directory}/it-bundles</outputDirectory><overWriteSnapshots>true</overWriteSnapshots><artifactItems>
+          <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId><version>3.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.bouncycastle</groupId><artifactId>bcpkix-jdk18on</artifactId><version>1.86</version><destFileName>bcpkix.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.86</version><destFileName>bcprov.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.bouncycastle</groupId><artifactId>bcutil-jdk18on</artifactId><version>1.86</version><destFileName>bcutil.jar</destFileName></artifactItem>

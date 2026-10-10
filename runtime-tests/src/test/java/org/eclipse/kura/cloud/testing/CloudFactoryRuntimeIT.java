@@ -20,6 +20,7 @@ import org.eclipse.kura.testing.osgi.EquinoxExtension;
 import org.eclipse.kura.testing.osgi.EquinoxRuntime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -72,11 +73,20 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(Scenario.class)
+    @EnumSource(value = Scenario.class, names = "SPARKPLUG", mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(scenario, runtime);
+    }
+
+    @Test
+    void sparkplugFactoryPipeline(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.SPARKPLUG, runtime);
+    }
+
+    private void verifyFactoryScenario(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         boolean withPublisher = scenario != Scenario.STACK;
         assertThrows(ClassNotFoundException.class, () -> Class.forName(CONFIG));
         List<Bundle> bundles = new ArrayList<>();
@@ -134,6 +144,11 @@ class CloudFactoryRuntimeIT {
                 assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
                 assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
                 assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
+                if (scenario == Scenario.SPARKPLUG) {
+                    SparkplugRuntimeScenario.run(runtime, configuration);
+                    configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
+                    return;
+                }
                 assertFalse(runtime.hasService(CLOUD, "(kura.service.pid=" + CLOUD_PID + ")"));
                 factory.call("createConfiguration", CLOUD_PID, CLOUD_NAME, CLOUD_DESCRIPTION);
                 List<?> stack;
