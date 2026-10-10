@@ -44,4 +44,7 @@
     <module>distrib</module>
     <module>dp</module>
   </modules>
+  <profiles>
+    <profile><id>osgi-it</id><modules><module>runtime-tests</module></modules></profile>
+  </profiles>
 </project>
