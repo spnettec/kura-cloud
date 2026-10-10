@@ -45,7 +45,8 @@ class CloudFactoryRuntimeIT {
     private static final String CLOUD_DESCRIPTION = "保留本地名称与描述";
     private static final String DATABASE_PID = "org.eclipse.kura.db.H2DbService";
     private static final Set<String> RESOLVE_ONLY = Set.of("org.eclipse.kura.core", "org.eclipse.kura.core.keystore",
-            "org.eclipse.kura.core.inventory", "org.apache.felix.deploymentadmin");
+            "org.eclipse.kura.core.inventory", "org.apache.felix.deploymentadmin",
+            "org.eclipse.kura.rest.cloudconnection.provider", "org.eclipse.kura.rest.configuration.provider");
     @TempDir Path data;
     private String previousConfiguration;
     private String previousCustomConfiguration;
@@ -73,10 +74,10 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(value = Scenario.class, names = "SPARKPLUG", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST" }, mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(scenario, runtime);
     }
@@ -86,12 +87,18 @@ class CloudFactoryRuntimeIT {
         verifyFactoryScenario(Scenario.SPARKPLUG, runtime);
     }
 
+    @Test
+    void restFactoryPipeline(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.REST, runtime);
+    }
+
     private void verifyFactoryScenario(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         boolean withPublisher = scenario != Scenario.STACK;
         assertThrows(ClassNotFoundException.class, () -> Class.forName(CONFIG));
         List<Bundle> bundles = new ArrayList<>();
         try (var paths = Files.list(Path.of("target/it-bundles"))) {
-            for (Path jar : paths.filter(p -> p.toString().endsWith(".jar")).sorted().toList()) {
+            for (Path jar : paths.filter(p -> p.toString().endsWith(".jar"))
+                    .filter(p -> !p.getFileName().toString().equals("org.eclipse.kura.rest.cloudconnection.provider.jar")).sorted().toList()) {
                 bundles.add(runtime.install(jar));
             }
         }
@@ -144,6 +151,11 @@ class CloudFactoryRuntimeIT {
                 assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
                 assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
                 assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
+                if (scenario == Scenario.REST) {
+                    CloudRestRuntimeScenario.run(runtime);
+                    configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
+                    return;
+                }
                 if (scenario == Scenario.SPARKPLUG) {
                     SparkplugRuntimeScenario.run(runtime, configuration);
                     configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);

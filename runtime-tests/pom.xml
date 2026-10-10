@@ -5,6 +5,11 @@
   <parent><groupId>org.eclipse.kura</groupId><artifactId>kura-cloud</artifactId><version>3.0.0-SNAPSHOT</version><relativePath>../pom.xml</relativePath></parent>
   <artifactId>kura-cloud-runtime-tests</artifactId>
   <dependencies>
+    <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.useradmin.store</artifactId><version>2.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
+    <dependency><groupId>com.google.code.gson</groupId><artifactId>gson</artifactId><version>2.11.0</version><scope>test</scope></dependency>
+    <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId><version>2.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
+    <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.rest.configuration.provider</artifactId><version>2.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
+    <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId><version>3.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
     <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId><version>3.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
     <dependency><groupId>com.github.moquette-io.moquette</groupId><artifactId>moquette-broker</artifactId><version>0.18.0</version><scope>test</scope>
       <exclusions><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-reload4j</artifactId></exclusion><exclusion><groupId>com.h2database</groupId><artifactId>h2-mvstore</artifactId></exclusion></exclusions>
@@ -32,6 +37,16 @@
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>
       <executions><execution><id>prepare-real-cloud-bundles</id><phase>process-test-resources</phase><goals><goal>copy</goal></goals>
         <configuration><outputDirectory>${project.build.directory}/it-bundles</outputDirectory><overWriteSnapshots>true</overWriteSnapshots><artifactItems>
+          <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.useradmin.store</artifactId><version>2.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.useradmin.store.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.apache.felix</groupId><artifactId>org.apache.felix.useradmin</artifactId><version>1.0.4</version><destFileName>org.apache.felix.useradmin.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.glassfish.hk2</groupId><artifactId>osgi-resource-locator</artifactId><version>1.0.3</version><destFileName>osgi-resource-locator.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.glassfish.jersey.core</groupId><artifactId>jersey-common</artifactId><version>3.1.9</version><destFileName>jersey-common.jar</destFileName></artifactItem>
+          <artifactItem><groupId>jakarta.inject</groupId><artifactId>jakarta.inject-api</artifactId><version>2.0.1</version><destFileName>jakarta.inject-api.jar</destFileName></artifactItem>
+          <artifactItem><groupId>jakarta.annotation</groupId><artifactId>jakarta.annotation-api</artifactId><version>2.1.1</version><destFileName>jakarta.annotation-api.jar</destFileName></artifactItem>
+          <artifactItem><groupId>jakarta.ws.rs</groupId><artifactId>jakarta.ws.rs-api</artifactId><version>3.1.0</version><destFileName>jakarta.ws.rs-api.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId><version>2.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.request.handler.jaxrs.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.rest.configuration.provider</artifactId><version>2.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.rest.configuration.provider.jar</destFileName></artifactItem>
+          <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId><version>3.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.rest.cloudconnection.provider.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId><version>3.0.0-SNAPSHOT</version><destFileName>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.bouncycastle</groupId><artifactId>bcpkix-jdk18on</artifactId><version>1.86</version><destFileName>bcpkix.jar</destFileName></artifactItem>
           <artifactItem><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.86</version><destFileName>bcprov.jar</destFileName></artifactItem>
