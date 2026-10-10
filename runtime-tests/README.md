@@ -3,9 +3,10 @@
 JUnit 5 starts an isolated Equinox framework with actual SCR, ConfigurationAdmin,
 ConfigurationService, CryptoService, cloud factory, CloudService, DataService,
 MQTT transport, H2 database and publisher bundles. Host system/status/watchdog
-services are controlled boundaries. The suite verifies actual in-memory SQL and
-authenticated MQTT over a random loopback port; file persistence/TLS remain outside
-this suite.
+services are controlled boundaries. The suite verifies actual in-memory SQL,
+authenticated MQTT, filesystem JKS/SCR TLS and WSS over random loopback ports.
+The file-backed H2 scenario restarts the actual H2 and DataService factory services,
+then checks the same queued message ID, body, QoS and eventual removal after replay.
 
 Five parameter invocations cover stack existence, publisher registration, JSON MQTT,
 Protobuf MQTT and tamper-triggered birth publication. The transport cases queue a publication while disconnected,
@@ -35,6 +36,16 @@ SCR binding. Initial MQTT BIRTH reports `NOT_TAMPERED`; an actual EventAdmin eve
 then triggers `TAMPERED` BIRTH after the production 30-second delay. Neither the
 executor nor CloudService private state is replaced. The sensor is unregistered
 at teardown. This validates the event pipeline, not physical tamper hardware.
+
+The WSS scenario uses the same real ConfigurationService, filesystem keystore and
+SslManagerService path as MQTTS. It checks a missing client key, wrong trust anchor,
+hostname mismatch, mutual TLS delivery and CRL revocation against Moquette's secure
+WebSocket listener. Its controller provides only the external broker and observer.
+
+IDEA: import this repository as Maven with JDK 21 and Maven 3.10, enable `osgi-it`,
+and use the shared `Kura cloud Sparkplug runtime` JUnit configuration. Prepare current
+bundle JARs with Maven before direct IDEA Run/Debug; IDEA Make compiles test classes
+but does not rebuild the copied `target/it-bundles` artifacts.
 
 After installing core and cloud artifacts into the same Maven cache:
 

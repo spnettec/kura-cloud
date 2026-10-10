@@ -40,7 +40,8 @@ final class CloudTlsRuntimeScenario {
     private static final String TOPIC = "fixture/tls/roundtrip";
     enum Case { MISSING_KEY, WRONG_TRUST, WRONG_HOSTNAME, MUTUAL_TLS, REVOCATION }
 
-    static void run(EquinoxRuntime runtime, Service configuration, Path directory, boolean sparkplug) throws Exception {
+    static void run(EquinoxRuntime runtime, Service configuration, Path directory, boolean sparkplug,
+            boolean websocket) throws Exception {
         TestCA brokerCA = new TestCA(CertificateCreationOptions.builder(new X500Name("CN=runtime broker CA")).build());
         KeyPair serverKey = TestCA.generateKeyPair();
         X509Certificate serverCertificate = brokerCA.createAndSignCertificate(
@@ -56,6 +57,7 @@ final class CloudTlsRuntimeScenario {
         options.setProperty("host", "127.0.0.1");
         options.setProperty("port", "0");
         options.setProperty("ssl_port", "0");
+        if (websocket) { options.setProperty("secure_websocket_port", "0"); }
         options.setProperty("allow_anonymous", "true");
         options.setProperty("need_client_auth", "true");
         options.setProperty("persistence_enabled", "false");
@@ -66,6 +68,7 @@ final class CloudTlsRuntimeScenario {
                 try { return broker.getPort() > 0 && broker.getSslPort() > 0; }
                 catch (ConcurrentModificationException bindingInProgress) { return false; }
             }, "TLS broker did not bind");
+            int secureWebsocketPort = websocket ? awaitSecureWebsocketPort(broker) : -1;
             LinkedBlockingQueue<MqttMessage> messages = new LinkedBlockingQueue<>();
             LinkedBlockingQueue<MqttMessage> deaths = new LinkedBlockingQueue<>();
             try (MqttClient observer = new MqttClient("tcp://127.0.0.1:" + broker.getPort(), "tls-observer", new MemoryPersistence())) {
@@ -93,7 +96,9 @@ final class CloudTlsRuntimeScenario {
                         try (var output = Files.newOutputStream(file)) { keys.store(output, PASSWORD.toCharArray()); }
                         try (var crl = scenario == Case.REVOCATION
                                 ? new RuntimeCrlFeed(runtime, brokerCA, serverCertificate, "fixture.tls.keys." + scenario) : null) {
-                            verify(runtime, configuration, file, scenario, broker.getSslPort(), messages, deaths, sparkplug, crl);
+                            verify(runtime, configuration, file, scenario,
+                                    websocket ? secureWebsocketPort : broker.getSslPort(), messages, deaths,
+                                    sparkplug, websocket, crl);
                         }
                     }
                 } finally { observer.disconnect(); }
@@ -102,7 +107,8 @@ final class CloudTlsRuntimeScenario {
     }
 
     private static void verify(EquinoxRuntime runtime, Service configuration, Path file, Case scenario, int port,
-            LinkedBlockingQueue<MqttMessage> messages, LinkedBlockingQueue<MqttMessage> deaths, boolean sparkplug, RuntimeCrlFeed crl) throws Exception {
+            LinkedBlockingQueue<MqttMessage> messages, LinkedBlockingQueue<MqttMessage> deaths,
+            boolean sparkplug, boolean websocket, RuntimeCrlFeed crl) throws Exception {
         String keyPid = "fixture.tls.keys." + scenario;
         String sslPid = "fixture.tls.ssl." + scenario;
         String transportPid = "fixture.tls.transport." + scenario;
@@ -124,7 +130,9 @@ final class CloudTlsRuntimeScenario {
                             "ssl.revocation.check.enabled", crl != null, "ssl.revocation.mode", "CRL_ONLY"), true);
             try (var ssl = runtime.service(SSL_FACTORY, filter(sslPid), Duration.ofSeconds(10))) {
                 assertEquals("org.eclipse.kura.core", ssl.provider().getSymbolicName());
-                String uri = (sparkplug ? "ssl://" : "mqtts://") + (scenario == Case.WRONG_HOSTNAME ? "127.0.0.1" : "localhost") + ":" + port;
+                String uri = (websocket ? "wss://" : sparkplug ? "ssl://" : "mqtts://")
+                        + (scenario == Case.WRONG_HOSTNAME ? "127.0.0.1" : "localhost") + ":" + port
+                        + (websocket ? "/mqtt" : "");
                 Map<String, Object> transportOptions = sparkplug
                         ? Map.of("server.uris", uri, "client.id", "tls-client-" + scenario, "connection.timeout", 2,
                                 "SslManagerService.target", filter(sslPid))
@@ -199,6 +207,21 @@ final class CloudTlsRuntimeScenario {
     }
 
     private static String filter(String pid) { return "(kura.service.pid=" + pid + ")"; }
+
+    @SuppressWarnings("unchecked")
+    private static int awaitSecureWebsocketPort(Server broker) throws Exception {
+        var acceptorField = Server.class.getDeclaredField("acceptor");
+        acceptorField.setAccessible(true);
+        Object acceptor = acceptorField.get(broker);
+        var portsField = acceptor.getClass().getDeclaredField("ports");
+        portsField.setAccessible(true);
+        Map<String, Integer> ports = (Map<String, Integer>) portsField.get(acceptor);
+        await(() -> {
+            try { return ports.getOrDefault("Secure websocket", 0) > 0; }
+            catch (ConcurrentModificationException bindingInProgress) { return false; }
+        }, "WSS broker did not bind");
+        return ports.get("Secure websocket");
+    }
     private static void await(Callable<Boolean> condition, String message) throws Exception {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         while (!condition.call() && System.nanoTime() < deadline) { Thread.sleep(20); }

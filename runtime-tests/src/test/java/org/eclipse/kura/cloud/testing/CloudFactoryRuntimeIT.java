@@ -74,10 +74,10 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST, REST_EARLY, TLS, SPARKPLUG_TLS }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, DURABILITY, REST, REST_EARLY, TLS, WSS, SPARKPLUG_TLS }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST", "REST_EARLY", "TLS", "SPARKPLUG_TLS" }, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "DURABILITY", "REST", "REST_EARLY", "TLS", "WSS", "SPARKPLUG_TLS" }, mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(scenario, runtime);
     }
@@ -85,6 +85,11 @@ class CloudFactoryRuntimeIT {
     @Test
     void sparkplugFactoryPipeline(EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(Scenario.SPARKPLUG, runtime);
+    }
+
+    @Test
+    void sparkplugFileStoreRestart(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.DURABILITY, runtime);
     }
 
     @Test
@@ -100,6 +105,11 @@ class CloudFactoryRuntimeIT {
     @Test
     void tlsFilesystemPipeline(EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(Scenario.TLS, runtime);
+    }
+
+    @Test
+    void wssFilesystemPipeline(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.WSS, runtime);
     }
 
     @Test
@@ -148,7 +158,9 @@ class CloudFactoryRuntimeIT {
                          "(service.pid=org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory)", Duration.ofSeconds(10))) {
                 assertEquals(CLOUD, factory.call("getFactoryPid"));
                 configuration.call("createFactoryConfiguration", "org.eclipse.kura.core.db.H2DbService", DATABASE_PID,
-                        Map.of("db.connector.url", "jdbc:h2:mem:cloudFactory"), true);
+                        Map.of("db.connector.url", scenario == Scenario.DURABILITY
+                                ? "jdbc:h2:file:" + data.resolve("durable-messages")
+                                : "jdbc:h2:mem:cloudFactory"), true);
                 try (var database = runtime.service("org.eclipse.kura.db.BaseDbService",
                         "(kura.service.pid=" + DATABASE_PID + ")", Duration.ofSeconds(10));
                      var connection = (Connection) database.call("getConnection");
@@ -172,8 +184,9 @@ class CloudFactoryRuntimeIT {
                 assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
                 assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
                 assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
-                if (scenario == Scenario.TLS || scenario == Scenario.SPARKPLUG_TLS) {
-                    CloudTlsRuntimeScenario.run(runtime, configuration, data, scenario == Scenario.SPARKPLUG_TLS);
+                if (scenario == Scenario.TLS || scenario == Scenario.WSS || scenario == Scenario.SPARKPLUG_TLS) {
+                    CloudTlsRuntimeScenario.run(runtime, configuration, data, scenario == Scenario.SPARKPLUG_TLS,
+                            scenario == Scenario.WSS);
                     configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
                     return;
                 }
@@ -188,6 +201,11 @@ class CloudFactoryRuntimeIT {
                 }
                 if (scenario == Scenario.SPARKPLUG) {
                     SparkplugRuntimeScenario.run(runtime, configuration);
+                    configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
+                    return;
+                }
+                if (scenario == Scenario.DURABILITY) {
+                    SparkplugFileStoreScenario.run(runtime, configuration, data, DATABASE_PID);
                     configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
                     return;
                 }
