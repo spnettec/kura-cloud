@@ -5,6 +5,11 @@
   <parent><groupId>org.eclipse.kura</groupId><artifactId>kura-cloud</artifactId><version>3.0.0-SNAPSHOT</version><relativePath>../pom.xml</relativePath></parent>
   <artifactId>kura-cloud-runtime-tests</artifactId>
   <dependencies>
+    <dependency><groupId>com.github.moquette-io.moquette</groupId><artifactId>moquette-broker</artifactId><version>0.18.0</version><scope>test</scope>
+      <exclusions><exclusion><groupId>org.slf4j</groupId><artifactId>slf4j-reload4j</artifactId></exclusion><exclusion><groupId>com.h2database</groupId><artifactId>h2-mvstore</artifactId></exclusion></exclusions>
+    </dependency>
+    <dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><version>2.3.232</version><scope>test</scope></dependency>
+    <dependency><groupId>org.eclipse.paho</groupId><artifactId>org.eclipse.paho.client.mqttv3</artifactId><version>1.2.5</version><scope>test</scope></dependency>
     <dependency><groupId>org.eclipse.kura</groupId><artifactId>kura-osgi-test-support</artifactId><version>6.0.0-SNAPSHOT</version><scope>test</scope></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.api</artifactId><version>3.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
@@ -21,6 +26,7 @@
     <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.util</artifactId><version>2.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
     <dependency><groupId>org.eclipse.kura</groupId><artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId><version>2.0.0-SNAPSHOT</version><type>pom</type><scope>test</scope><exclusions><exclusion><groupId>*</groupId><artifactId>*</artifactId></exclusion></exclusions></dependency>
   </dependencies>
+  <repositories><repository><id>jitpack.io</id><url>https://jitpack.io</url></repository></repositories>
   <build><plugins>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>
       <executions><execution><id>prepare-real-cloud-bundles</id><phase>process-test-resources</phase><goals><goal>copy</goal></goals>

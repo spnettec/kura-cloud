@@ -26,7 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.osgi.framework.Bundle;
 
 /** Factory creation crosses real SCR/ConfigAdmin, bundle classloaders and cloud services. */
@@ -72,9 +72,12 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    @ParameterizedTest(name = "factory stack with publisher: {0}")
-    @ValueSource(booleans = {false, true})
-    void serviceExistsThroughRealFactory(boolean withPublisher, EquinoxRuntime runtime) throws Exception {
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF }
+
+    @ParameterizedTest(name = "real factory scenario: {0}")
+    @EnumSource(Scenario.class)
+    void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
+        boolean withPublisher = scenario != Scenario.STACK;
         assertThrows(ClassNotFoundException.class, () -> Class.forName(CONFIG));
         List<Bundle> bundles = new ArrayList<>();
         try (var paths = Files.list(Path.of("target/it-bundles"))) {
@@ -174,6 +177,10 @@ class CloudFactoryRuntimeIT {
                             // A bound publisher rejects null input after resolving its real CloudService.
                             // An unbound publisher would instead throw SERVICE_UNAVAILABLE.
                             assertThrows(IllegalArgumentException.class, () -> publisher.call("publish", (Object) null));
+                            if (scenario == Scenario.MQTT_JSON || scenario == Scenario.MQTT_PROTOBUF) {
+                                CloudMqttScenario.run(runtime, configuration, cloud, publisher, stack,
+                                        scenario == Scenario.MQTT_JSON ? "simple-json" : "kura-protobuf");
+                            }
                         }
                         configuration.call("deleteFactoryConfiguration", "fixture.publisher", true);
                         awaitAbsent(() -> runtime.hasService(PUBLISHER, "(kura.service.pid=fixture.publisher)"));
