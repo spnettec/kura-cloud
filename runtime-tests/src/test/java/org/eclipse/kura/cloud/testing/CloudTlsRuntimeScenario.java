@@ -67,14 +67,18 @@ final class CloudTlsRuntimeScenario {
                 catch (ConcurrentModificationException bindingInProgress) { return false; }
             }, "TLS broker did not bind");
             LinkedBlockingQueue<MqttMessage> messages = new LinkedBlockingQueue<>();
+            LinkedBlockingQueue<MqttMessage> deaths = new LinkedBlockingQueue<>();
             try (MqttClient observer = new MqttClient("tcp://127.0.0.1:" + broker.getPort(), "tls-observer", new MemoryPersistence())) {
                 observer.setCallback(new MqttCallback() {
                     public void connectionLost(Throwable cause) { }
                     public void deliveryComplete(IMqttDeliveryToken token) { }
-                    public void messageArrived(String topic, MqttMessage message) { messages.add(message); }
+                    public void messageArrived(String topic, MqttMessage message) {
+                        (topic.equals(TOPIC) ? messages : deaths).add(message);
+                    }
                 });
                 observer.connect();
                 observer.subscribe(TOPIC, 1);
+                if (sparkplug) { observer.subscribe("spBv1.0/group/NDEATH/node", 1); }
                 try {
                     for (Case scenario : Case.values()) {
                         Path file = directory.resolve(scenario.name() + ".jks");
@@ -89,7 +93,7 @@ final class CloudTlsRuntimeScenario {
                         try (var output = Files.newOutputStream(file)) { keys.store(output, PASSWORD.toCharArray()); }
                         try (var crl = scenario == Case.REVOCATION
                                 ? new RuntimeCrlFeed(runtime, brokerCA, serverCertificate, "fixture.tls.keys." + scenario) : null) {
-                            verify(runtime, configuration, file, scenario, broker.getSslPort(), messages, sparkplug, crl);
+                            verify(runtime, configuration, file, scenario, broker.getSslPort(), messages, deaths, sparkplug, crl);
                         }
                     }
                 } finally { observer.disconnect(); }
@@ -98,7 +102,7 @@ final class CloudTlsRuntimeScenario {
     }
 
     private static void verify(EquinoxRuntime runtime, Service configuration, Path file, Case scenario, int port,
-            LinkedBlockingQueue<MqttMessage> messages, boolean sparkplug, RuntimeCrlFeed crl) throws Exception {
+            LinkedBlockingQueue<MqttMessage> messages, LinkedBlockingQueue<MqttMessage> deaths, boolean sparkplug, RuntimeCrlFeed crl) throws Exception {
         String keyPid = "fixture.tls.keys." + scenario;
         String sslPid = "fixture.tls.ssl." + scenario;
         String transportPid = "fixture.tls.transport." + scenario;
@@ -133,6 +137,20 @@ final class CloudTlsRuntimeScenario {
                     assertEquals(sparkplug ? "org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider"
                             : "org.eclipse.kura.cloud.base.provider", transport.provider().getSymbolicName());
                     assertEquals(filter(sslPid), transport.property("SslManagerService.target"));
+                    LinkedBlockingQueue<Object> confirmations = new LinkedBlockingQueue<>();
+                    java.util.concurrent.atomic.AtomicReference<Throwable> connectionLost = new java.util.concurrent.atomic.AtomicReference<>();
+                    Class<?> listenerType = runtime.bundle("org.eclipse.kura.api")
+                            .loadClass("org.eclipse.kura.data.transport.listener.DataTransportListener");
+                    Object observer = java.lang.reflect.Proxy.newProxyInstance(listenerType.getClassLoader(),
+                            new Class<?>[] { listenerType }, (proxy, method, args) -> {
+                                if (method.getName().equals("onConnectionLost")) { connectionLost.set((Throwable) args[0]); }
+                                if (method.getName().equals("onMessageConfirmed")) { confirmations.add(args[0]); }
+                                if (method.getName().equals("hashCode")) { return System.identityHashCode(proxy); }
+                                if (method.getName().equals("equals")) { return proxy == args[0]; }
+                                if (method.getName().equals("toString")) { return "TLS connection observer"; }
+                                return null;
+                            });
+                    transport.call("addDataTransportListener", observer);
                     if (scenario != Case.MUTUAL_TLS && scenario != Case.REVOCATION) {
                         Exception failure = assertThrows(Exception.class, () -> transport.call("connect"));
                         assertEquals("org.eclipse.kura.KuraConnectException", failure.getClass().getName());
@@ -143,14 +161,25 @@ final class CloudTlsRuntimeScenario {
                         try {
                             byte[] body = ("真实文件密钥库双向 TLS:" + sparkplug + ":" + scenario)
                                     .getBytes(StandardCharsets.UTF_8);
-                            assertNotNull(transport.call("publish", TOPIC, body, 1, false));
+                            Object sent = transport.call("publish", TOPIC, body, 1, false);
+                            assertNotNull(sent);
+                            Object confirmed = confirmations.poll(10, TimeUnit.SECONDS);
+                            assertNotNull(confirmed, () -> "Missing delivery confirmation; connectionLost=" + connectionLost.get());
+                            assertEquals(sent, confirmed);
                             MqttMessage delivered = messages.poll(10, TimeUnit.SECONDS);
                             assertNotNull(delivered);
                             assertArrayEquals(body, delivered.getPayload());
                             assertEquals(1, delivered.getQos());
                             assertFalse(delivered.isRetained());
+                            assertNull(connectionLost.get(), "Unexpected connection loss");
                             assertTrue((Boolean) transport.call("isConnected"), "Transport disconnected during publication");
                         } finally { transport.call("disconnect", 0L); }
+                        if (sparkplug) {
+                            MqttMessage death = deaths.poll(10, TimeUnit.SECONDS);
+                            assertNotNull(death, "Missing graceful NDEATH");
+                            assertEquals(0, death.getQos(), "Graceful NDEATH, not QoS 1 last will");
+                            assertFalse(death.isRetained());
+                        }
                         if (crl != null) {
                             crl.revokeAndAwait(keys);
                             Exception revoked = assertThrows(Exception.class, () -> transport.call("connect"));
