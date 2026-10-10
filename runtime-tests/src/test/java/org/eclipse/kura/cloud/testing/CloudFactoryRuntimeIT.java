@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,9 @@ class CloudFactoryRuntimeIT {
     private static final String CLOUD_PID = "fixture.custom.connection";
     private static final String CLOUD_NAME = "测试云连接";
     private static final String CLOUD_DESCRIPTION = "保留本地名称与描述";
+    private static final String DATABASE_PID = "org.eclipse.kura.db.H2DbService";
     private static final Set<String> RESOLVE_ONLY = Set.of("org.eclipse.kura.core", "org.eclipse.kura.core.keystore",
-            "org.eclipse.kura.core.inventory", "org.apache.felix.deploymentadmin", "org.eclipse.kura.db.h2db.provider");
+            "org.eclipse.kura.core.inventory", "org.apache.felix.deploymentadmin");
     @TempDir Path data;
     private String previousConfiguration;
     private String previousCustomConfiguration;
@@ -104,6 +106,31 @@ class CloudFactoryRuntimeIT {
                  var factory = runtime.service("org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory",
                          "(service.pid=org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory)", Duration.ofSeconds(10))) {
                 assertEquals(CLOUD, factory.call("getFactoryPid"));
+                configuration.call("createFactoryConfiguration", "org.eclipse.kura.core.db.H2DbService", DATABASE_PID,
+                        Map.of("db.connector.url", "jdbc:h2:mem:cloudFactory"), true);
+                try (var database = runtime.service("org.eclipse.kura.db.BaseDbService",
+                        "(kura.service.pid=" + DATABASE_PID + ")", Duration.ofSeconds(10));
+                     var connection = (Connection) database.call("getConnection");
+                     var statement = connection.createStatement();
+                     var result = statement.executeQuery("SELECT 42")) {
+                    assertEquals("org.eclipse.kura.db.h2db.provider", database.provider().getSymbolicName());
+                    assertTrue(result.next());
+                    assertEquals(42, result.getInt(1));
+                }
+                assertTrue(((Set<?>) configuration.call("getFactoryComponentPids"))
+                        .contains("org.eclipse.kura.core.db.H2DbService"), "H2 database factory must be discoverable");
+                assertTrue(((Set<?>) configuration.call("getFactoryComponentPids"))
+                        .contains("org.eclipse.kura.core.db.H2DbServer"), "H2 server remains a separate factory");
+                verifyDatabaseLocalization(runtime, bundles);
+                Object defaults = configuration.call("getDefaultComponentConfiguration", "org.eclipse.kura.core.db.H2DbService");
+                Map<?, ?> defaultProperties = (Map<?, ?>) EquinoxRuntime.invoke(
+                        configuration.provider().loadClass("org.eclipse.kura.configuration.ComponentConfiguration"),
+                        defaults, "getConfigurationProperties");
+                assertEquals("jdbc:h2:mem:kuradb", defaultProperties.get("db.connector.url"));
+                assertEquals("SA", defaultProperties.get("db.user"));
+                assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
+                assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
+                assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
                 assertFalse(runtime.hasService(CLOUD, "(kura.service.pid=" + CLOUD_PID + ")"));
                 factory.call("createConfiguration", CLOUD_PID, CLOUD_NAME, CLOUD_DESCRIPTION);
                 List<?> stack;
@@ -158,9 +185,27 @@ class CloudFactoryRuntimeIT {
                             "(kura.service.pid=" + pid + ")"));
                 }
                 assertEquals(Set.of(), factory.call("getManagedCloudConnectionPids"));
+                configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
             } catch (Exception | Error failure) {
                 runtime.diagnose("cloud-factory-scenario");
                 throw failure;
+            }
+        }
+    }
+
+    private static void verifyDatabaseLocalization(EquinoxRuntime runtime, List<Bundle> bundles) throws Exception {
+        Bundle database = bundles.stream().filter(b -> "org.eclipse.kura.db.h2db.provider".equals(b.getSymbolicName()))
+                .findFirst().orElseThrow();
+        try (var metatype = runtime.service("org.osgi.service.metatype.MetaTypeService", null, Duration.ofSeconds(5))) {
+            Object information = metatype.call("getMetaTypeInformation", database);
+            Class<?> informationContract = metatype.provider().loadClass("org.osgi.service.metatype.MetaTypeInformation");
+            Class<?> definitionContract = metatype.provider().loadClass("org.osgi.service.metatype.ObjectClassDefinition");
+            for (var locale : Map.of("en", "DbService", "zh", "H2 数据库服务").entrySet()) {
+                Object definition = EquinoxRuntime.invoke(informationContract, information, "getObjectClassDefinition",
+                        "org.eclipse.kura.core.db.H2DbService", locale.getKey());
+                assertEquals(locale.getValue(), EquinoxRuntime.invoke(definitionContract, definition, "getName"));
+                Object[] attributes = (Object[]) EquinoxRuntime.invoke(definitionContract, definition, "getAttributeDefinitions", -1);
+                assertEquals(6, attributes.length);
             }
         }
     }
