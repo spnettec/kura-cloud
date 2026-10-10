@@ -41,7 +41,7 @@ final class CloudMqttScenario {
     private static final String BIRTH_TOPIC = "EDC/factory-account/" + CLIENT + "/MQTT/BIRTH";
 
     static void run(EquinoxRuntime runtime, Service configuration, Service cloud, Service publisher,
-            List<?> stack, String encoding, boolean withTamper) throws Exception {
+            List<?> stack, String encoding, boolean withTamper, boolean withCoreHandlers) throws Exception {
         Server broker = new Server();
         AtomicBoolean authenticatedCloud = new AtomicBoolean();
         Properties options = new Properties();
@@ -50,6 +50,10 @@ final class CloudMqttScenario {
         options.setProperty("allow_anonymous", "false");
         options.setProperty("persistence_enabled", "false");
         options.setProperty("telemetry_enabled", "false");
+        if (withCoreHandlers) {
+            // The JSON bundle inventory exceeds Moquette's 8092-byte default after MQTT payload encoding.
+            options.setProperty("netty.mqtt.message_size", "131072");
+        }
         try {
             broker.startServer(new MemoryConfig(options), List.of(), null, (clientId, username, password) -> {
                 boolean accepted = USER.equals(username)
@@ -156,6 +160,9 @@ final class CloudMqttScenario {
                     assertEquals("保留本地名称与描述", cloud.property("kura.cloud.factory.desc"));
                     if (tamper != null) { tamper.verifyBirthRepublishing(births); }
                     verifyClientRoundTrip(cloud, payloadType);
+                    if (withCoreHandlers) {
+                        CoreProtocolMqttScenario.run(runtime, cloud, uri, USER, PASSWORD, CLIENT);
+                    }
                 } finally {
                     try {
                         if ((Boolean) cloud.call("isConnected")) { manager.call("disconnect"); }

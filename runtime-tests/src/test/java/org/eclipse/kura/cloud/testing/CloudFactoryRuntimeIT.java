@@ -74,10 +74,10 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, DURABILITY, REST, REST_EARLY, TLS, WSS, SPARKPLUG_TLS }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, CORE_PROTOCOL, SPARKPLUG, DURABILITY, REST, REST_EARLY, TLS, WSS, SPARKPLUG_TLS }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "DURABILITY", "REST", "REST_EARLY", "TLS", "WSS", "SPARKPLUG_TLS" }, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Scenario.class, names = { "CORE_PROTOCOL", "SPARKPLUG", "DURABILITY", "REST", "REST_EARLY", "TLS", "WSS", "SPARKPLUG_TLS" }, mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(scenario, runtime);
     }
@@ -85,6 +85,11 @@ class CloudFactoryRuntimeIT {
     @Test
     void sparkplugFactoryPipeline(EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(Scenario.SPARKPLUG, runtime);
+    }
+
+    @Test
+    void coreHandlersOverMqtt(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.CORE_PROTOCOL, runtime);
     }
 
     @Test
@@ -152,7 +157,9 @@ class CloudFactoryRuntimeIT {
                      CloudFactoryRuntimeIT::boundaryValue, Map.of());
              var status = runtime.register(API, "org.eclipse.kura.status.CloudConnectionStatusService",
                      CloudFactoryRuntimeIT::boundaryValue, Map.of())) {
-            runtime.start(bundles.stream().filter(b -> !RESOLVE_ONLY.contains(b.getSymbolicName())).toList());
+            runtime.start(bundles.stream().filter(b -> !RESOLVE_ONLY.contains(b.getSymbolicName())
+                    || scenario == Scenario.CORE_PROTOCOL
+                            && "org.apache.felix.deploymentadmin".equals(b.getSymbolicName())).toList());
             try (var configuration = runtime.service(CONFIG, null, Duration.ofSeconds(10));
                  var factory = runtime.service("org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory",
                          "(service.pid=org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory)", Duration.ofSeconds(10))) {
@@ -253,10 +260,11 @@ class CloudFactoryRuntimeIT {
                             // An unbound publisher would instead throw SERVICE_UNAVAILABLE.
                             assertThrows(IllegalArgumentException.class, () -> publisher.call("publish", (Object) null));
                             if (scenario == Scenario.MQTT_JSON || scenario == Scenario.MQTT_PROTOBUF
+                                    || scenario == Scenario.CORE_PROTOCOL
                                     || scenario == Scenario.MQTT_TAMPER) {
                                 CloudMqttScenario.run(runtime, configuration, cloud, publisher, stack,
                                         scenario == Scenario.MQTT_PROTOBUF ? "kura-protobuf" : "simple-json",
-                                        scenario == Scenario.MQTT_TAMPER);
+                                        scenario == Scenario.MQTT_TAMPER, scenario == Scenario.CORE_PROTOCOL);
                             }
                         }
                         configuration.call("deleteFactoryConfiguration", "fixture.publisher", true);
