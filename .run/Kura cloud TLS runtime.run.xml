@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Kura cloud TLS runtime" type="JUnit" factoryName="JUnit">
+    <module name="kura-cloud-runtime-tests" />
+    <option name="PACKAGE_NAME" value="org.eclipse.kura.cloud.testing" />
+    <option name="MAIN_CLASS_NAME" value="org.eclipse.kura.cloud.testing.CloudFactoryRuntimeIT" />
+    <option name="METHOD_NAME" value="sparkplugTlsFilesystemPipeline" />
+    <option name="TEST_OBJECT" value="method" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/runtime-tests" />
+    <option name="VM_PARAMETERS" value="-ea -Djunit.jupiter.execution.timeout.mode=disabled_on_debug" />
+    <method v="2"><option name="Make" enabled="true" /></method>
+  </configuration>
+</component>

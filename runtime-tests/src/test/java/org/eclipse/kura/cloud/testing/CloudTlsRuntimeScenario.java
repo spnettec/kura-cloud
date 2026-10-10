@@ -164,8 +164,7 @@ final class CloudTlsRuntimeScenario {
                         assertEquals("org.eclipse.kura.KuraConnectException", failure.getClass().getName());
                         assertFalse((Boolean) transport.call("isConnected"));
                     } else {
-                        transport.call("connect");
-                        assertTrue((Boolean) transport.call("isConnected"));
+                        connectAfterConfigurationSettles(transport, scenario);
                         try {
                             byte[] body = ("真实文件密钥库双向 TLS:" + sparkplug + ":" + scenario)
                                     .getBytes(StandardCharsets.UTF_8);
@@ -207,6 +206,22 @@ final class CloudTlsRuntimeScenario {
     }
 
     private static String filter(String pid) { return "(kura.service.pid=" + pid + ")"; }
+
+    private static void connectAfterConfigurationSettles(Service transport, Case scenario) throws Exception {
+        long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+        Exception lastFailure = null;
+        do {
+            if ((Boolean) transport.call("isConnected")) { return; }
+            try {
+                transport.call("connect");
+            } catch (Exception failure) {
+                lastFailure = failure;
+            }
+            if ((Boolean) transport.call("isConnected")) { return; }
+            Thread.sleep(100);
+        } while (System.nanoTime() < deadline);
+        throw new AssertionError("TLS transport did not remain connected for " + scenario, lastFailure);
+    }
 
     @SuppressWarnings("unchecked")
     private static int awaitSecureWebsocketPort(Server broker) throws Exception {
