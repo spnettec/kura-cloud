@@ -134,7 +134,8 @@ public class SparkplugMqttClient {
             return new Established();
         }
 
-        private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
+        private void newClientConnection()
+                throws MqttException, GeneralSecurityException, IOException, KuraConnectException {
             SparkplugMqttClient.this.bdSeqCounter.next();
             setWillMessage();
             logger.debug("bdSeq: {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
@@ -145,6 +146,8 @@ public class SparkplugMqttClient {
                 Thread.sleep(randomDelay);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                // Cancellation must stop before a new Paho client is created.
+                throw new KuraConnectException(e, "Reconnection interrupted before connecting");
             }
 
             SparkplugMqttClient.this.client = new MqttAsyncClient(getNextServer(), SparkplugMqttClient.this.clientId,
