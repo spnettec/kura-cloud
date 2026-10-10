@@ -7,8 +7,8 @@ services are controlled boundaries. The suite verifies actual in-memory SQL and
 authenticated MQTT over a random loopback port; file persistence/TLS remain outside
 this suite.
 
-Four parameter invocations cover stack existence, publisher registration, JSON MQTT
-and Protobuf MQTT. The two transport cases queue a publication while disconnected,
+Five parameter invocations cover stack existence, publisher registration, JSON MQTT,
+Protobuf MQTT and tamper-triggered birth publication. The transport cases queue a publication while disconnected,
 connect through real configuration/crypto/data services, then check broker receipt
 and the publisher's confirmation ID. CloudClient data/control round trips check all
 six publication/confirmation/arrival callbacks, Unicode bodies, timestamps, metrics,
@@ -29,6 +29,12 @@ use the existing configurable `EDC` control prefix. Production defaults are unch
 The broker requires fixed test credentials and disables persistence and telemetry.
 Kura APIs remain absent from the controller classpath; its Moquette/H2/Paho libraries
 serve only the external broker/observer. Business services run in actual bundles.
+
+The tamper variant registers a simulated sensor through OSGi and observes actual
+SCR binding. Initial MQTT BIRTH reports `NOT_TAMPERED`; an actual EventAdmin event
+then triggers `TAMPERED` BIRTH after the production 30-second delay. Neither the
+executor nor CloudService private state is replaced. The sensor is unregistered
+at teardown. This validates the event pipeline, not physical tamper hardware.
 
 After installing core and cloud artifacts into the same Maven cache:
 

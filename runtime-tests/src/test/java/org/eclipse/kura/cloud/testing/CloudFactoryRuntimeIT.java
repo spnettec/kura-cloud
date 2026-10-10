@@ -32,7 +32,7 @@ import org.osgi.framework.Bundle;
 /** Factory creation crosses real SCR/ConfigAdmin, bundle classloaders and cloud services. */
 @ExtendWith(EquinoxExtension.class)
 @ResourceLock(Resources.SYSTEM_PROPERTIES)
-@Timeout(value = 60, unit = TimeUnit.SECONDS)
+@Timeout(value = 90, unit = TimeUnit.SECONDS)
 class CloudFactoryRuntimeIT {
     private static final String API = "org.eclipse.kura.api";
     private static final String CONFIG = "org.eclipse.kura.configuration.ConfigurationService";
@@ -72,7 +72,7 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
     @EnumSource(Scenario.class)
@@ -177,9 +177,11 @@ class CloudFactoryRuntimeIT {
                             // A bound publisher rejects null input after resolving its real CloudService.
                             // An unbound publisher would instead throw SERVICE_UNAVAILABLE.
                             assertThrows(IllegalArgumentException.class, () -> publisher.call("publish", (Object) null));
-                            if (scenario == Scenario.MQTT_JSON || scenario == Scenario.MQTT_PROTOBUF) {
+                            if (scenario == Scenario.MQTT_JSON || scenario == Scenario.MQTT_PROTOBUF
+                                    || scenario == Scenario.MQTT_TAMPER) {
                                 CloudMqttScenario.run(runtime, configuration, cloud, publisher, stack,
-                                        scenario == Scenario.MQTT_JSON ? "simple-json" : "kura-protobuf");
+                                        scenario == Scenario.MQTT_PROTOBUF ? "kura-protobuf" : "simple-json",
+                                        scenario == Scenario.MQTT_TAMPER);
                             }
                         }
                         configuration.call("deleteFactoryConfiguration", "fixture.publisher", true);

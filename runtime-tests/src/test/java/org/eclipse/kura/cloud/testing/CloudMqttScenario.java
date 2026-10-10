@@ -38,9 +38,10 @@ final class CloudMqttScenario {
     private static final String PASSWORD = "isolated-test-password";
     private static final String CLIENT = "factory-client";
     private static final String TOPIC = "factory-account/" + CLIENT + "/fixture-app/factory-data";
+    private static final String BIRTH_TOPIC = "EDC/factory-account/" + CLIENT + "/MQTT/BIRTH";
 
     static void run(EquinoxRuntime runtime, Service configuration, Service cloud, Service publisher,
-            List<?> stack, String encoding) throws Exception {
+            List<?> stack, String encoding, boolean withTamper) throws Exception {
         Server broker = new Server();
         AtomicBoolean authenticatedCloud = new AtomicBoolean();
         Properties options = new Properties();
@@ -62,7 +63,9 @@ final class CloudMqttScenario {
             }, "Broker did not bind a loopback port");
             String uri = "tcp://127.0.0.1:" + broker.getPort();
             LinkedBlockingQueue<MqttMessage> received = new LinkedBlockingQueue<>();
+            LinkedBlockingQueue<MqttMessage> births = new LinkedBlockingQueue<>();
             try (MqttClient observer = new MqttClient(uri, "factory-observer", new MemoryPersistence());
+                 var tamper = withTamper ? new CloudTamperScenario(runtime, cloud) : null;
                  var manager = runtime.service("org.eclipse.kura.cloudconnection.CloudConnectionManager",
                          "(kura.service.pid=" + stack.get(0) + ")", Duration.ofSeconds(5));
                  var transport = runtime.service("org.eclipse.kura.data.DataTransportService",
@@ -74,6 +77,7 @@ final class CloudMqttScenario {
                     public void deliveryComplete(IMqttDeliveryToken token) { }
                     public void messageArrived(String topic, MqttMessage message) {
                         if (TOPIC.equals(topic)) { received.add(message); }
+                        if (BIRTH_TOPIC.equals(topic)) { births.add(message); }
                     }
                 });
                 MqttConnectOptions connection = new MqttConnectOptions();
@@ -82,6 +86,7 @@ final class CloudMqttScenario {
                 connection.setConnectionTimeout(3);
                 observer.connect(connection);
                 observer.subscribe(TOPIC, 1);
+                if (withTamper) { observer.subscribe(BIRTH_TOPIC, 1); }
                 try {
                     Class<?> passwordType = cloud.provider().loadClass("org.eclipse.kura.configuration.Password");
                     Object password = passwordType.getConstructor(char[].class).newInstance((Object) PASSWORD.toCharArray());
@@ -149,6 +154,7 @@ final class CloudMqttScenario {
                             "Delivered publication remained unpublished");
                     assertEquals("测试云连接", cloud.property("kura.cloud.factory.name"));
                     assertEquals("保留本地名称与描述", cloud.property("kura.cloud.factory.desc"));
+                    if (tamper != null) { tamper.verifyBirthRepublishing(births); }
                     verifyClientRoundTrip(cloud, payloadType);
                 } finally {
                     try {
