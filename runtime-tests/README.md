@@ -7,6 +7,11 @@ services are controlled boundaries. The suite verifies actual in-memory SQL,
 authenticated MQTT, filesystem JKS/SCR TLS and WSS over random loopback ports.
 The file-backed H2 scenario restarts the actual H2 and DataService factory services,
 then checks the same queued message ID, body, QoS and eventual removal after replay.
+For a complete Java process restart, `DataServiceProcessRestartProbe` runs the seed
+and replay phases in separate Maven invocations against one isolated H2 file. It
+checks distinct JVM PIDs, the recovered message ID, exact Unicode payload, QoS 1,
+non-retained delivery and queue drain. This opt-in class is excluded from the
+ordinary Failsafe `*IT` selection.
 
 Five parameter invocations cover stack existence, publisher registration, JSON MQTT,
 Protobuf MQTT and tamper-triggered birth publication. The transport cases queue a publication while disconnected,
@@ -54,6 +59,24 @@ mvn -f runtime-tests/pom.xml clean verify
 # Or include this module in the cloud/IDEA reactor:
 mvn -Posgi-it verify
 ```
+
+To verify file durability across Java processes, first prepare current
+`target/it-bundles` with the normal runtime build. Then choose a **new empty**
+directory outside `target/runtime` and run both commands from this repository root:
+
+```sh
+export KURA_DURABILITY_DIR=/absolute/path/to/new/empty/durability-directory
+mvn -f runtime-tests/pom.xml -Dkura.durability.dir="$KURA_DURABILITY_DIR" \
+  -Dit.test=DataServiceProcessRestartProbe#seedQueue verify
+mvn -f runtime-tests/pom.xml -Dkura.durability.dir="$KURA_DURABILITY_DIR" \
+  -Dit.test=DataServiceProcessRestartProbe#replayQueue verify
+```
+
+Use the same Maven repository setting for both invocations if the workspace uses
+`-Dmaven.repo.local`. Save the first Failsafe XML report before the second command
+overwrites it. The probe writes `seed.properties` and `replay.properties` with
+process and queue identifiers; neither contains credentials. These commands
+validate an isolated Equinox/SCR assembly on macOS, not a deployed gateway restart.
 
 Use Maven 3.10 and JDK 21. `kura/build-all.sh` invokes this suite after sibling
 installation when `RUN_IT=1`; `-DskipITs` skips Failsafe. Business JARs are copied
