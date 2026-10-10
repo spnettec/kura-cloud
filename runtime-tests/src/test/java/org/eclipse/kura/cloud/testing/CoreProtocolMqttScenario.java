@@ -3,6 +3,8 @@ package org.eclipse.kura.cloud.testing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +12,13 @@ import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.eclipse.kura.testing.osgi.EquinoxRuntime;
 import org.eclipse.kura.testing.osgi.EquinoxRuntime.Service;
@@ -27,6 +35,9 @@ final class CoreProtocolMqttScenario {
     private static final String ACCOUNT = "factory-account";
     private static final String OBSERVER = "core-protocol-observer";
     private static final String JSON_PID = "org.eclipse.kura.json.marshaller.unmarshaller.provider";
+    private static final String PACKAGE_NAME = "org.eclipse.kura.cloud.testing.mqtt.inventory";
+    private static final String BUNDLE_NAME = PACKAGE_NAME + ".bundle";
+    private static final String BUNDLE_VERSION = "1.0.0.test";
 
     private CoreProtocolMqttScenario() { }
 
@@ -44,6 +55,8 @@ final class CoreProtocolMqttScenario {
                      "(kura.service.pid=" + JSON_PID + ")", Duration.ofSeconds(5));
              var unmarshaller = runtime.service("org.eclipse.kura.marshalling.Unmarshaller",
                      "(kura.service.pid=" + JSON_PID + ")", Duration.ofSeconds(5));
+             var deploymentAdmin = runtime.service("org.osgi.service.deploymentadmin.DeploymentAdmin", null,
+                     Duration.ofSeconds(5));
              MqttClient observer = new MqttClient(brokerUri, OBSERVER, new MemoryPersistence())) {
             assertEquals("org.eclipse.kura.core.inventory", inventory.provider().getSymbolicName());
             assertEquals("org.eclipse.kura.rest.configuration.provider",
@@ -59,8 +72,13 @@ final class CoreProtocolMqttScenario {
             options.setUserName(user);
             options.setPassword(password.toCharArray());
             options.setConnectionTimeout(3);
-            observer.connect(options);
+            Object deploymentPackage = deploymentAdmin.call("installDeploymentPackage",
+                    new ByteArrayInputStream(deploymentPackageBytes()));
+            Bundle installedBundle = null;
             try {
+                installedBundle = runtime.bundle(BUNDLE_NAME);
+                assertEquals(Bundle.ACTIVE, installedBundle.getState());
+                observer.connect(options);
                 assertTrue((Boolean) cloud.call("isConnected"));
                 Class<?> payloadType = cloud.provider().loadClass("org.eclipse.kura.message.KuraPayload");
                 String configuration = request(observer, replies, marshaller, unmarshaller, payloadType,
@@ -75,6 +93,19 @@ final class CoreProtocolMqttScenario {
                         clientId, "INVENTORY-V1", "bundles");
                 assertTrue(bundles.contains("org.eclipse.kura.core.inventory"),
                         "The real inventory handler must enumerate its installed Equinox bundle");
+                JsonObject deployment = findNamed(JsonParser.parseString(request(observer, replies, marshaller,
+                        unmarshaller, payloadType, clientId, "INVENTORY-V1", "deploymentPackages"))
+                        .getAsJsonObject().getAsJsonArray("deploymentPackages"), PACKAGE_NAME);
+                assertEquals("1.0.0", deployment.get("version").getAsString());
+                assertFalse(deployment.get("signed").getAsBoolean());
+                JsonObject packageBundle = findNamed(deployment.getAsJsonArray("bundles"), BUNDLE_NAME);
+                assertEquals(BUNDLE_VERSION, packageBundle.get("version").getAsString());
+                assertEquals("ACTIVE", packageBundle.get("state").getAsString());
+                JsonArray inventoryItems = JsonParser.parseString(request(observer, replies, marshaller, unmarshaller,
+                        payloadType, clientId, "INVENTORY-V1", "inventory"))
+                        .getAsJsonObject().getAsJsonArray("inventory");
+                assertEquals("DP", findNamed(inventoryItems, PACKAGE_NAME).get("type").getAsString());
+                assertEquals(BUNDLE_VERSION, findNamed(inventoryItems, BUNDLE_NAME).get("version").getAsString());
                 String written = request(observer, replies, marshaller, unmarshaller, payloadType,
                         clientId, "CONF-V2", "EXEC", "snapshots/_write", null);
                 long snapshotId = JsonParser.parseString(written).getAsJsonObject().get("id").getAsLong();
@@ -87,9 +118,60 @@ final class CoreProtocolMqttScenario {
                 assertTrue(restored.contains("fixture.custom.connection"),
                         "CONF-V2 must read the encrypted snapshot through the real ConfigurationService");
             } finally {
-                observer.disconnect();
+                try {
+                    if (observer.isConnected()) {
+                        observer.disconnect();
+                    }
+                } finally {
+                    Class<?> packageType = deploymentAdmin.provider()
+                            .loadClass("org.osgi.service.deploymentadmin.DeploymentPackage");
+                    EquinoxRuntime.invoke(packageType, deploymentPackage, "uninstall");
+                    if (installedBundle != null) {
+                        assertEquals(Bundle.UNINSTALLED, installedBundle.getState());
+                    }
+                }
             }
         }
+    }
+
+    private static JsonObject findNamed(JsonArray items, String name) {
+        assertNotNull(items);
+        for (var element : items) {
+            JsonObject item = element.getAsJsonObject();
+            if (name.equals(item.get("name").getAsString())) {
+                return item;
+            }
+        }
+        return fail("Missing inventory resource " + name);
+    }
+
+    private static byte[] deploymentPackageBytes() throws Exception {
+        Manifest bundle = new Manifest();
+        Attributes bundleHeaders = bundle.getMainAttributes();
+        bundleHeaders.putValue("Manifest-Version", "1.0");
+        bundleHeaders.putValue("Bundle-ManifestVersion", "2");
+        bundleHeaders.putValue("Bundle-SymbolicName", BUNDLE_NAME);
+        bundleHeaders.putValue("Bundle-Version", BUNDLE_VERSION);
+        ByteArrayOutputStream bundleBytes = new ByteArrayOutputStream();
+        try (JarOutputStream jar = new JarOutputStream(bundleBytes, bundle)) {
+            // A manifest-only bundle exercises DeploymentAdmin without a host service.
+        }
+        String path = "bundles/fixture.jar";
+        Manifest manifest = new Manifest();
+        manifest.getMainAttributes().putValue("Manifest-Version", "1.0");
+        manifest.getMainAttributes().putValue("DeploymentPackage-SymbolicName", PACKAGE_NAME);
+        manifest.getMainAttributes().putValue("DeploymentPackage-Version", "1.0.0");
+        Attributes entry = new Attributes();
+        entry.putValue("Bundle-SymbolicName", BUNDLE_NAME);
+        entry.putValue("Bundle-Version", BUNDLE_VERSION);
+        manifest.getEntries().put(path, entry);
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (JarOutputStream jar = new JarOutputStream(bytes, manifest)) {
+            jar.putNextEntry(new JarEntry(path));
+            jar.write(bundleBytes.toByteArray());
+            jar.closeEntry();
+        }
+        return bytes.toByteArray();
     }
 
     private static String request(MqttClient observer, LinkedBlockingQueue<MqttMessage> replies,
