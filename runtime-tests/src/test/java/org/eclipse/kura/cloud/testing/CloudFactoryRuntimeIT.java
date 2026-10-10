@@ -74,10 +74,10 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST, REST_EARLY }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST, REST_EARLY, TLS, SPARKPLUG_TLS }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST", "REST_EARLY" }, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST", "REST_EARLY", "TLS", "SPARKPLUG_TLS" }, mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(scenario, runtime);
     }
@@ -95,6 +95,16 @@ class CloudFactoryRuntimeIT {
     @Test
     void restInitialStartup(EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(Scenario.REST_EARLY, runtime);
+    }
+
+    @Test
+    void tlsFilesystemPipeline(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.TLS, runtime);
+    }
+
+    @Test
+    void sparkplugTlsFilesystemPipeline(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.SPARKPLUG_TLS, runtime);
     }
 
     private void verifyFactoryScenario(Scenario scenario, EquinoxRuntime runtime) throws Exception {
@@ -162,6 +172,11 @@ class CloudFactoryRuntimeIT {
                 assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
                 assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
                 assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
+                if (scenario == Scenario.TLS || scenario == Scenario.SPARKPLUG_TLS) {
+                    CloudTlsRuntimeScenario.run(runtime, configuration, data, scenario == Scenario.SPARKPLUG_TLS);
+                    configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
+                    return;
+                }
                 if (scenario == Scenario.REST || scenario == Scenario.REST_EARLY) {
                     if (scenario == Scenario.REST_EARLY) {
                         assertEquals(Bundle.ACTIVE, runtime.bundle("org.eclipse.kura.rest.cloudconnection.provider").getState(),
