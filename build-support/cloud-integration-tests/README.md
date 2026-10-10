@@ -13,3 +13,7 @@ production bundle or any runtime distribution.
 
 Validation for fixture export: Maven 3.10.0 / JDK 21, all 57 cloud base tests and
 installation pass; the fixture JAR contains exactly the two expected classes.
+
+Endpoint suites may override `configureBrokerProperties(Properties)` for a bounded
+large request limit. The default fixture retains Moquette defaults. This hook affects
+test broker configuration only; production transport and broker configuration do not change.

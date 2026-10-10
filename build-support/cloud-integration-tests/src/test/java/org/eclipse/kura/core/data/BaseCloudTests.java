@@ -70,6 +70,7 @@ public abstract class BaseCloudTests {
         properties.setProperty("allow_anonymous", "true");
         properties.setProperty("persistence_enabled", "false");
         properties.setProperty("telemetry_enabled", "false");
+        configureBrokerProperties(properties);
         this.broker = new Server();
         this.broker.startServer(properties);
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
@@ -86,6 +87,10 @@ public abstract class BaseCloudTests {
             TimeUnit.MILLISECONDS.sleep(10);
         }
         throw new IllegalStateException("Broker did not report its bound port");
+    }
+
+    /** Allows endpoint fixtures to carry bounded large payloads without changing broker defaults for other tests. */
+    protected void configureBrokerProperties(Properties properties) {
     }
 
     @SuppressWarnings("unchecked")
