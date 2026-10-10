@@ -159,7 +159,8 @@ class CloudFactoryRuntimeIT {
                      CloudFactoryRuntimeIT::boundaryValue, Map.of())) {
             runtime.start(bundles.stream().filter(b -> !RESOLVE_ONLY.contains(b.getSymbolicName())
                     || scenario == Scenario.CORE_PROTOCOL
-                            && "org.apache.felix.deploymentadmin".equals(b.getSymbolicName())).toList());
+                            && Set.of("org.apache.felix.deploymentadmin", "org.eclipse.kura.rest.configuration.provider")
+                                    .contains(b.getSymbolicName())).toList());
             try (var configuration = runtime.service(CONFIG, null, Duration.ofSeconds(10));
                  var factory = runtime.service("org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory",
                          "(service.pid=org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory)", Duration.ofSeconds(10))) {
@@ -264,7 +265,7 @@ class CloudFactoryRuntimeIT {
                                     || scenario == Scenario.MQTT_TAMPER) {
                                 CloudMqttScenario.run(runtime, configuration, cloud, publisher, stack,
                                         scenario == Scenario.MQTT_PROTOBUF ? "kura-protobuf" : "simple-json",
-                                        scenario == Scenario.MQTT_TAMPER, scenario == Scenario.CORE_PROTOCOL);
+                                        scenario == Scenario.MQTT_TAMPER, scenario == Scenario.CORE_PROTOCOL, data);
                             }
                         }
                         configuration.call("deleteFactoryConfiguration", "fixture.publisher", true);

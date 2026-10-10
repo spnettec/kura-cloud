@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
@@ -41,7 +42,8 @@ final class CloudMqttScenario {
     private static final String BIRTH_TOPIC = "EDC/factory-account/" + CLIENT + "/MQTT/BIRTH";
 
     static void run(EquinoxRuntime runtime, Service configuration, Service cloud, Service publisher,
-            List<?> stack, String encoding, boolean withTamper, boolean withCoreHandlers) throws Exception {
+            List<?> stack, String encoding, boolean withTamper, boolean withCoreHandlers,
+            Path dataDirectory) throws Exception {
         Server broker = new Server();
         AtomicBoolean authenticatedCloud = new AtomicBoolean();
         Properties options = new Properties();
@@ -161,7 +163,7 @@ final class CloudMqttScenario {
                     if (tamper != null) { tamper.verifyBirthRepublishing(births); }
                     verifyClientRoundTrip(cloud, payloadType);
                     if (withCoreHandlers) {
-                        CoreProtocolMqttScenario.run(runtime, cloud, uri, USER, PASSWORD, CLIENT);
+                        CoreProtocolMqttScenario.run(runtime, cloud, uri, USER, PASSWORD, CLIENT, dataDirectory);
                     }
                 } finally {
                     try {
