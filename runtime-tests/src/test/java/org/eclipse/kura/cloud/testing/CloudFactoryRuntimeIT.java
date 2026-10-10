@@ -142,6 +142,10 @@ class CloudFactoryRuntimeIT {
         }
         Properties properties = new Properties();
         properties.setProperty("kura.snapshots.encrypt", "true");
+        Class<?> resourceType = runtime.bundle(API).loadClass("org.eclipse.kura.system.SystemResourceType");
+        Object osPackage = runtime.bundle(API).loadClass("org.eclipse.kura.system.SystemResourceInfo")
+                .getConstructor(String.class, String.class, resourceType)
+                .newInstance("fixture-os-package", "1.0", resourceType.getField("DEB").get(null));
         try (var system = runtime.register(API, "org.eclipse.kura.system.SystemService", (proxy, method, args) ->
                     switch (method.getName()) {
                         case "getKuraDataDirectory", "getKuraHome", "getKuraConfigDirectory" -> data.toString();
@@ -149,6 +153,7 @@ class CloudFactoryRuntimeIT {
                         case "getKuraSnapshotsCount" -> 10;
                         case "getProperties" -> properties;
                         case "getPrimaryMacAddress" -> "02:00:00:00:00:01";
+                        case "getSystemPackages" -> scenario == Scenario.CORE_PROTOCOL ? List.of(osPackage) : List.of();
                         default -> boundaryValue(proxy, method, args);
                     }, Map.of());
              var admin = runtime.register(API, "org.eclipse.kura.system.SystemAdminService",

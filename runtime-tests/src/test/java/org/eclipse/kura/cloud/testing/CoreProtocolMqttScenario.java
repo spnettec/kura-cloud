@@ -87,8 +87,10 @@ final class CoreProtocolMqttScenario {
                         "The real configuration handler must return its SCR factory configuration");
                 String packages = request(observer, replies, marshaller, unmarshaller, payloadType,
                         clientId, "INVENTORY-V1", "systemPackages");
-                assertTrue(packages.contains("\"systemPackages\""),
-                        "The real inventory handler must return its system package response");
+                JsonObject osPackage = findNamed(JsonParser.parseString(packages).getAsJsonObject()
+                        .getAsJsonArray("systemPackages"), "fixture-os-package");
+                assertEquals("1.0", osPackage.get("version").getAsString());
+                assertEquals("DEB", osPackage.get("type").getAsString());
                 String bundles = request(observer, replies, marshaller, unmarshaller, payloadType,
                         clientId, "INVENTORY-V1", "bundles");
                 assertTrue(bundles.contains("org.eclipse.kura.core.inventory"),
@@ -106,6 +108,9 @@ final class CoreProtocolMqttScenario {
                         .getAsJsonObject().getAsJsonArray("inventory");
                 assertEquals("DP", findNamed(inventoryItems, PACKAGE_NAME).get("type").getAsString());
                 assertEquals(BUNDLE_VERSION, findNamed(inventoryItems, BUNDLE_NAME).get("version").getAsString());
+                JsonObject inventoriedOsPackage = findNamed(inventoryItems, "fixture-os-package");
+                assertEquals("1.0", inventoriedOsPackage.get("version").getAsString());
+                assertEquals("DEB", inventoriedOsPackage.get("type").getAsString());
                 String written = request(observer, replies, marshaller, unmarshaller, payloadType,
                         clientId, "CONF-V2", "EXEC", "snapshots/_write", null);
                 long snapshotId = JsonParser.parseString(written).getAsJsonObject().get("id").getAsLong();
