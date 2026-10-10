@@ -238,7 +238,9 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
     @Override
     public void deliveryComplete(IMqttDeliveryToken deliveryToken) {
         try {
-            if (deliveryToken.getMessage().getQos() > 0) {
+            // Paho clears the message after acknowledging QoS 1/2 delivery.
+            MqttMessage message = deliveryToken.getMessage();
+            if (message == null || message.getQos() > 0) {
                 DataTransportToken dataTransportToken = new DataTransportToken(deliveryToken.getMessageId(),
                         this.sessionId);
 
