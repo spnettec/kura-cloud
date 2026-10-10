@@ -74,10 +74,10 @@ class CloudFactoryRuntimeIT {
         }
     }
 
-    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST }
+    enum Scenario { STACK, PUBLISHER, MQTT_JSON, MQTT_PROTOBUF, MQTT_TAMPER, SPARKPLUG, REST, REST_EARLY }
 
     @ParameterizedTest(name = "real factory scenario: {0}")
-    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST" }, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Scenario.class, names = { "SPARKPLUG", "REST", "REST_EARLY" }, mode = EnumSource.Mode.EXCLUDE)
     void serviceExistsThroughRealFactory(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         verifyFactoryScenario(scenario, runtime);
     }
@@ -92,18 +92,29 @@ class CloudFactoryRuntimeIT {
         verifyFactoryScenario(Scenario.REST, runtime);
     }
 
+    @Test
+    void restInitialStartup(EquinoxRuntime runtime) throws Exception {
+        verifyFactoryScenario(Scenario.REST_EARLY, runtime);
+    }
+
     private void verifyFactoryScenario(Scenario scenario, EquinoxRuntime runtime) throws Exception {
         boolean withPublisher = scenario != Scenario.STACK;
         assertThrows(ClassNotFoundException.class, () -> Class.forName(CONFIG));
         List<Bundle> bundles = new ArrayList<>();
         try (var paths = Files.list(Path.of("target/it-bundles"))) {
             for (Path jar : paths.filter(p -> p.toString().endsWith(".jar"))
-                    .filter(p -> !p.getFileName().toString().equals("org.eclipse.kura.rest.cloudconnection.provider.jar")).sorted().toList()) {
+                    .filter(p -> scenario == Scenario.REST_EARLY || !p.getFileName().toString().equals("org.eclipse.kura.rest.cloudconnection.provider.jar")).sorted().toList()) {
                 bundles.add(runtime.install(jar));
             }
         }
         runtime.resolve(bundles);
         Files.createDirectories(data.resolve("snapshots"));
+        if (scenario == Scenario.REST_EARLY) {
+            try (var source = getClass().getResourceAsStream("/rest-role-snapshot.xml")) {
+                assertNotNull(source);
+                Files.copy(source, data.resolve("snapshots/snapshot_0.xml"));
+            }
+        }
         Properties properties = new Properties();
         properties.setProperty("kura.snapshots.encrypt", "true");
         try (var system = runtime.register(API, "org.eclipse.kura.system.SystemService", (proxy, method, args) ->
@@ -151,7 +162,11 @@ class CloudFactoryRuntimeIT {
                 assertEquals(900, defaultProperties.get("db.checkpoint.interval.seconds"));
                 assertEquals(15, defaultProperties.get("db.defrag.interval.minutes"));
                 assertEquals(10, defaultProperties.get("db.connection.pool.max.size"));
-                if (scenario == Scenario.REST) {
+                if (scenario == Scenario.REST || scenario == Scenario.REST_EARLY) {
+                    if (scenario == Scenario.REST_EARLY) {
+                        assertEquals(Bundle.ACTIVE, runtime.bundle("org.eclipse.kura.rest.cloudconnection.provider").getState(),
+                                "Initial-start scenario must exercise REST before the late-arrival helper");
+                    }
                     CloudRestRuntimeScenario.run(runtime);
                     configuration.call("deleteFactoryConfiguration", DATABASE_PID, true);
                     return;
