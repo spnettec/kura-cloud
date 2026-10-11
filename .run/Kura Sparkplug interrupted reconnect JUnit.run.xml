@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Kura Sparkplug interrupted reconnect JUnit" type="JUnit" factoryName="JUnit">
+    <module name="org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider" />
+    <option name="PACKAGE_NAME" value="org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test" />
+    <option name="MAIN_CLASS_NAME" value="org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test.SparkplugInterruptedReconnectTest" />
+    <option name="TEST_OBJECT" value="class" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/bundles/org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider" />
+    <option name="VM_PARAMETERS" value="-ea" />
+    <method v="2"><option name="Make" enabled="true" /></method>
+  </configuration>
+</component>
