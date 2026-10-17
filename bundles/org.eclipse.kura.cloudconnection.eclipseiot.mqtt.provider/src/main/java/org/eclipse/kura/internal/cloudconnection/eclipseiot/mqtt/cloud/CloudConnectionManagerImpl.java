@@ -132,6 +132,7 @@ public class CloudConnectionManagerImpl
     String imei;
     String iccid;
     String imsi;
+    String eid;
     String rssi;
     String modemFwVer;
 
@@ -850,7 +851,7 @@ public class CloudConnectionManagerImpl
         }
     }
 
-    private void readModemProfile() {
+    void readModemProfile() {
         this.networkStatusService.ifPresent(statusService -> {
             List<ModemInterfaceStatus> modemStatuses = getModemsStatuses(statusService);
             if (nonNull(modemStatuses) && !modemStatuses.isEmpty()) {
@@ -859,6 +860,7 @@ public class CloudConnectionManagerImpl
                 this.imei = null;
                 this.iccid = null;
                 this.imsi = null;
+                this.eid = null;
                 this.rssi = null;
                 this.modemFwVer = null;
             }
@@ -899,9 +901,11 @@ public class CloudConnectionManagerImpl
 
         this.iccid = "NA";
         this.imsi = "NA";
+        this.eid = "NA";
         activeSim.ifPresent(sim -> {
             this.iccid = sim.getIccid();
             this.imsi = sim.getImsi();
+            this.eid = sim.getEid();
         });
         this.imei = modemStatus.getSerialNumber();
         this.rssi = String.valueOf(modemStatus.getSignalStrength());

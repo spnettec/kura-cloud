@@ -239,6 +239,26 @@ class CloudServiceTest {
         assertModem(publishBirth(), 2);
     }
 
+    @Test
+    void shouldClearPreviousModemEidWhenModemDisappears() throws Exception {
+        modemStatuses(modem(1, ModemConnectionStatus.CONNECTED));
+        assertModem(publishBirth(), 1);
+
+        modemStatuses();
+        assertNull(publishBirth().get("modem_eid"));
+    }
+
+    @Test
+    void shouldClearPreviousModemEidWhenPrimarySimBecomesInactive() throws Exception {
+        modemStatuses(modem(1, ModemConnectionStatus.CONNECTED));
+        assertModem(publishBirth(), 1);
+
+        modemStatuses(ModemInterfaceStatus.builder().withConnectionStatus(ModemConnectionStatus.CONNECTED)
+                .withAvailableSims(List.of(Sim.builder().withEid("previousEid")
+                        .withActive(false).withPrimary(true).build())).build());
+        assertNull(publishBirth().get("modem_eid"));
+    }
+
     private JsonObject publishBirth() {
         lastPayload.set(null);
         when(data.isConnected()).thenReturn(true);
@@ -267,13 +287,14 @@ class CloudServiceTest {
         return ModemInterfaceStatus.builder().withConnectionStatus(connection).withSerialNumber("fooImei" + id)
                 .withFirmwareVersion("fooFwVer" + id).withSignalStrength(id)
                 .withAvailableSims(List.of(Sim.builder().withIccid("fooIccid" + id).withImsi("fooImsi" + id)
-                        .withActive(true).withPrimary(true).build())).build();
+                        .withEid("fooEid" + id).withActive(true).withPrimary(true).build())).build();
     }
 
     private static void assertModem(JsonObject metrics, int id) {
         assertEquals("fooImei" + id, metrics.get("modem_imei").asString());
         assertEquals("fooImsi" + id, metrics.get("modem_imsi").asString());
         assertEquals("fooIccid" + id, metrics.get("modem_iccid").asString());
+        assertEquals("fooEid" + id, metrics.get("modem_eid").asString());
         assertEquals(Integer.toString(id), metrics.get("modem_rssi").asString());
         assertEquals("fooFwVer" + id, metrics.get("modem_firmware_version").asString());
     }
