@@ -46,7 +46,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onConnectionEstablished(newSession);
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onConnectionEstablished(newSession);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -74,7 +74,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onDisconnecting();
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onDisconnecting();
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -102,7 +102,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onDisconnected();
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onDisconnected();
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -130,7 +130,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onConfigurationUpdating(wasConnected);
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onConfigurationUpdating(wasConnected);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -158,7 +158,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onConfigurationUpdated(wasConnected);
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onConfigurationUpdated(wasConnected);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -186,7 +186,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onConnectionLost(cause);
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onConnectionLost(cause);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -214,7 +214,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onMessageArrived(topic, payload, qos,
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onMessageArrived(topic, payload, qos,
                             retained);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
@@ -243,7 +243,7 @@ class DataTransportListenerS implements DataTransportListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataTransportListener) service).onMessageConfirmed(token);
+                    ((org.eclipse.kura.data.transport.listener.DataTransportListener) service).onMessageConfirmed(token);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }

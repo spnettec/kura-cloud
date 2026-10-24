@@ -46,7 +46,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onConnectionEstablished();
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onConnectionEstablished();
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -74,7 +74,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onDisconnecting();
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onDisconnecting();
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -102,7 +102,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onDisconnected();
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onDisconnected();
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -130,7 +130,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onConnectionLost(cause);
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onConnectionLost(cause);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -158,7 +158,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onMessageArrived(topic, payload, qos,
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onMessageArrived(topic, payload, qos,
                             retained);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
@@ -187,7 +187,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onMessagePublished(messageId, topic);
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onMessagePublished(messageId, topic);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }
@@ -215,7 +215,7 @@ class DataServiceListenerS implements DataServiceListener {
         if (services != null) {
             for (Object service : services) {
                 try {
-                    ((org.eclipse.kura.data.DataServiceListener) service).onMessageConfirmed(messageId, topic);
+                    ((org.eclipse.kura.data.listener.DataServiceListener) service).onMessageConfirmed(messageId, topic);
                 } catch (Throwable t) {
                     logger.warn("Unexpected Throwable", t);
                 }

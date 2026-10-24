@@ -50,5 +50,5 @@
    <reference name="DataTransportListener"
               policy="dynamic"
               cardinality="0..n"
-              interface="org.eclipse.kura.data.DataTransportListener"/>
+              interface="org.eclipse.kura.data.transport.listener.DataTransportListener"/>
 </scr:component>

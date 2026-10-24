@@ -37,7 +37,7 @@
    <reference name="DataServiceListener"
               policy="dynamic"
               cardinality="0..n"
-              interface="org.eclipse.kura.data.DataServiceListener"/>
+              interface="org.eclipse.kura.data.listener.DataServiceListener"/>
    <reference name="WatchdogService"
    			  bind="setWatchdogService" 
    			  unbind="unsetWatchdogService"
