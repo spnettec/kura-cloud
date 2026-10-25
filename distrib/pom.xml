@@ -11,22 +11,16 @@
     Contributors:
      YOFC
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura-cloud.parent</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../bundles/pom.xml</relativePath>
     </parent>
-
     <artifactId>kura-cloud.distrib</artifactId>
     <packaging>pom</packaging>
-
     <dependencies>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -69,12 +63,10 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
     <properties>
         <addon.installation.dir.level1>/opt/eclipse/kura/siblings/cloud/1</addon.installation.dir.level1>
         <addon.installation.dir.level4s>/opt/eclipse/kura/siblings/cloud/4s</addon.installation.dir.level4s>
         <addon.installation.dir.level6s>/opt/eclipse/kura/siblings/cloud/6s</addon.installation.dir.level6s>
-
         <jar.cloud.base.provider.name>org.eclipse.kura.cloud.base.provider-${project.version}.jar</jar.cloud.base.provider.name>
         <jar.cloudconnection.eclipseiot.mqtt.provider.name>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider-${project.version}.jar</jar.cloudconnection.eclipseiot.mqtt.provider.name>
         <jar.cloudconnection.kapua.mqtt.provider.name>org.eclipse.kura.cloudconnection.kapua.mqtt.provider-${project.version}.jar</jar.cloudconnection.kapua.mqtt.provider.name>
@@ -83,7 +75,6 @@
         <jar.core.cloud.factory.name>org.eclipse.kura.core.cloud.factory-${project.version}.jar</jar.core.cloud.factory.name>
         <jar.misc.cloudcat.name>org.eclipse.kura.misc.cloudcat-${project.version}.jar</jar.misc.cloudcat.name>
         <jar.rest.cloudconnection.provider.name>org.eclipse.kura.rest.cloudconnection.provider-${project.version}.jar</jar.rest.cloudconnection.provider.name>
-
         <deb.architecture>all</deb.architecture>
         <package.name>kura-cloud</package.name>
         <kura.repo.distribution>kura-6</kura.repo.distribution>
@@ -91,7 +82,6 @@
         <summary>YOFC SMART IOT EDGE GATEWAY - Kura Cloud connection addon</summary>
         <long.description>The YOFC SMART IOT EDGE GATEWAY Kura Cloud addon provides cloud connection services for Eclipse IoT, Kapua, raw MQTT, and Sparkplug B protocols.</long.description>
     </properties>
-
     <profiles>
         <profile>
             <id>debugBuild</id>
@@ -145,7 +135,6 @@
             </build>
         </profile>
     </profiles>
-
     <build>
         <plugins>
             <plugin>
@@ -162,13 +151,12 @@
                             <name>release.version</name>
                             <value>${project.version}</value>
                             <regex>-SNAPSHOT</regex>
-                            <replacement></replacement>
+                            <replacement />
                             <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -191,7 +179,6 @@
                     </includeOnlyProperties>
                 </configuration>
             </plugin>
-
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -210,7 +197,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.vafer</groupId>
                 <artifactId>jdeb</artifactId>
@@ -352,3 +338,4 @@
         </plugins>
     </build>
 </project>
+
