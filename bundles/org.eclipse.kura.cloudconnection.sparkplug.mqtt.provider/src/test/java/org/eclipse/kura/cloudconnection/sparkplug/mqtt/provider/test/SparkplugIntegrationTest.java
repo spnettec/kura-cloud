@@ -25,7 +25,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -55,6 +54,8 @@ import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 
 import io.moquette.broker.Server;
+import io.netty.channel.EventLoopGroup;
+import io.netty.util.concurrent.EventExecutor;
 
 /** Real loopback MQTT fixture. Equinox/SCR assembly is outside this fixture. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -75,6 +76,9 @@ abstract class SparkplugIntegrationTest {
         Properties options = new Properties();
         options.setProperty("host", "127.0.0.1");
         options.setProperty("port", "0");
+        options.setProperty("websocket_port", "disabled");
+        options.setProperty("ssl_port", "disabled");
+        options.setProperty("secure_websocket_port", "disabled");
         options.setProperty("allow_anonymous", "true");
         options.setProperty("persistence_enabled", "false");
         options.setProperty("telemetry_enabled", "false");
@@ -83,19 +87,21 @@ abstract class SparkplugIntegrationTest {
         this.brokerUri = "tcp://127.0.0.1:" + awaitBrokerPort();
     }
 
-    private int awaitBrokerPort() throws InterruptedException {
-        // Moquette 0.18 completes its port-map listener asynchronously after bind.
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-        while (System.nanoTime() < deadline) {
-            try {
-                int port = this.broker.getPort();
-                if (port > 0) {
-                    return port;
-                }
-            } catch (ConcurrentModificationException bindingInProgress) {
-                // Retry only this third-party startup race, never test assertions.
-            }
-            TimeUnit.MILLISECONDS.sleep(10);
+    private int awaitBrokerPort() throws Exception {
+        // The bind listener writes a non-concurrent map asynchronously. Drain the boss
+        // event loops before getPort() can mutate that map, and establish visibility.
+        var acceptorField = Server.class.getDeclaredField("acceptor");
+        acceptorField.setAccessible(true);
+        Object acceptor = acceptorField.get(this.broker);
+        var groupField = acceptor.getClass().getDeclaredField("bossGroup");
+        groupField.setAccessible(true);
+        EventLoopGroup bossGroup = (EventLoopGroup) groupField.get(acceptor);
+        for (EventExecutor executor : bossGroup) {
+            executor.submit(() -> { }).get(5, TimeUnit.SECONDS);
+        }
+        int port = this.broker.getPort();
+        if (port > 0) {
+            return port;
         }
         throw new IllegalStateException("Moquette did not report its bound loopback port");
     }
